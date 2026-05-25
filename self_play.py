@@ -6,6 +6,7 @@ Saves game records into AI_Games/<personality>/ directories.
 import os
 import json
 import copy
+from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 from engine import (
@@ -203,6 +204,7 @@ class SelfPlay:
         self.out_dir = out_dir
         self.title_prefix = title_prefix
         os.makedirs(out_dir, exist_ok=True)
+        self.ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Share the same board state
         self.board = [row[:] for row in red_engine.board]
@@ -231,7 +233,7 @@ class SelfPlay:
         title = f"{self.title_prefix} | 步{move_num} | {label}"
         img = draw_board(board, highlight_move=move, title=title,
                          score=score, mate_in=mate_in)
-        fname = os.path.join(self.out_dir, f"turn_{move_num:03d}_{label}.png")
+        fname = os.path.join(self.out_dir, f"{self.ts}_turn_{move_num:03d}_{label}.png")
         img.save(fname)
         self.screenshots.append(fname)
         print(f"  [SCREENSHOT] {fname}")
@@ -313,11 +315,11 @@ class SelfPlay:
 
         self.record.result = result
         # Save text record
-        txt_path = os.path.join(self.out_dir, "game_record.txt")
+        txt_path = os.path.join(self.out_dir, f"game_record_{self.ts}.txt")
         with open(txt_path, 'w', encoding='utf-8') as f:
             f.write(self.record.to_text())
         # Save JSON record
-        json_path = os.path.join(self.out_dir, "game_record.json")
+        json_path = os.path.join(self.out_dir, f"game_record_{self.ts}.json")
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump({
                 "red":    self.record.red_name,
