@@ -775,18 +775,20 @@ class LiuDahuaAI(ChineseChessEngine):
     def get_best_move(self, depth=None):
         depth = self.SEARCH_DEPTH
 
-        # Opening book: first 5 moves
-        if self.opening_moves_used < 5 and self.turn == 'black':
+        # Opening book: first 5 moves, color-independent
+        if self.opening_moves_used < 5:
             book_moves = self.opening_book.get("start", [])
             if book_moves and self.opening_moves_used < len(book_moves):
                 move_tuple, weight = book_moves[self.opening_moves_used]
-                r1,c1 = move_tuple[0]
-                r2,c2 = move_tuple[1]
-                piece = self.board[r1][c1]
-                # Validate book move is legal
+                # Book is written from red's perspective; mirror when playing black
+                if self.turn == 'black':
+                    (r1,c1),(r2,c2) = move_tuple
+                    move_tuple = ((9-r1, 8-c1), (9-r2, 8-c2))
                 legal = self.generate_legal_moves(self.board, self.turn)
                 if move_tuple in legal:
                     self.opening_moves_used += 1
+                    r1,c1 = move_tuple[0]
+                    r2,c2 = move_tuple[1]
                     fmt = {'r1':r1,'c1':c1,'r2':r2,'c2':c2}
                     thought = {
                         'turn': self.turn, 'best_move': fmt, 'score': 0,
@@ -795,6 +797,8 @@ class LiuDahuaAI(ChineseChessEngine):
                     }
                     self.history.append(thought)
                     return {'move': fmt, 'thought': thought}
+                # Book move illegal (opponent diverged) — skip to search
+                self.opening_moves_used += 1
 
         return super().get_best_move(depth)
 
@@ -847,11 +851,15 @@ class HuRonghuaAI(ChineseChessEngine):
     def get_best_move(self, depth=None):
         depth = self.SEARCH_DEPTH
 
-        # Opening book: first 8 moves
-        if self.opening_moves_used < 8 and self.turn == 'black':
+        # Opening book: first 8 moves, color-independent
+        if self.opening_moves_used < 8:
             book_moves = self.opening_book.get("start", [])
             if book_moves and self.opening_moves_used < len(book_moves):
                 move_tuple, weight = book_moves[self.opening_moves_used]
+                # Book is written from red's perspective; mirror when playing black
+                if self.turn == 'black':
+                    (r1,c1),(r2,c2) = move_tuple
+                    move_tuple = ((9-r1, 8-c1), (9-r2, 8-c2))
                 legal = self.generate_legal_moves(self.board, self.turn)
                 if move_tuple in legal:
                     self.opening_moves_used += 1
@@ -865,6 +873,8 @@ class HuRonghuaAI(ChineseChessEngine):
                     }
                     self.history.append(thought)
                     return {'move': fmt, 'thought': thought}
+                # Book move illegal (opponent diverged) — skip to search
+                self.opening_moves_used += 1
 
         return super().get_best_move(depth)
 
