@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中國象棋 AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="main-layout">
+        <div class="panel left-panel">
+            <h2>黑方思路</h2>
+            <div id="black-thought">等待中...</div>
+        </div>
+
+        <div class="container">
+            <h1>中國象棋 AI</h1>
+            <div id="game-board" class="board">
+                <!-- Grid lines and pieces will be generated here -->
+            </div>
+            <div class="controls">
+                <div class="difficulty-row">
+                    <label>AI 對手：</label>
+                    <button class="diff-btn active" data-diff="easy">初學者</button>
+                    <button class="diff-btn" data-diff="medium">柳大華</button>
+                    <button class="diff-btn" data-diff="hard">胡榮華</button>
+                </div>
+                <div id="ai-label">當前AI：初學者</div>
+                <button id="reset-btn">重置遊戲</button>
+                <div id="status">玩家先行（紅方）</div>
+            </div>
+        </div>
+
+        <div class="panel right-panel">
+            <h2>紅方思路</h2>
+            <div id="red-thought">等待中...</div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

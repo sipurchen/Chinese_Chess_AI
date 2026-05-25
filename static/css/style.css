@@ -1,0 +1,228 @@
+body {
+    font-family: 'Noto Serif SC', serif;
+    background-color: #f0e6d2;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    padding-top: 20px;
+}
+
+.panel {
+    width: 250px;
+    background-color: #fff8dc;
+    border: 2px solid #8b4513;
+    padding: 15px;
+    margin: 0 20px;
+    height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.left-panel {
+    order: 1;
+}
+
+.container {
+    text-align: center;
+    order: 2;
+}
+
+.right-panel {
+    order: 3;
+}
+
+h2 {
+    color: #8b4513;
+    border-bottom: 1px solid #8b4513;
+    padding-bottom: 5px;
+}
+
+#black-thought,
+#red-thought {
+    font-family: monospace;
+    white-space: pre-wrap;
+    text-align: left;
+}
+
+.board {
+    width: 450px;
+    height: 500px;
+    background-color: #deb887;
+    border: 5px solid #8b4513;
+    position: relative;
+    margin: 20px auto;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Grid lines */
+.grid-line {
+    position: absolute;
+    background-color: #5c3a21;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.horizontal {
+    height: 2px;
+    width: 400px;
+    left: 25px;
+}
+
+.vertical {
+    width: 2px;
+    height: 200px;
+}
+
+.vertical-full {
+    width: 2px;
+    height: 450px;
+    top: 25px;
+}
+
+.diagonal {
+    position: absolute;
+    background-color: #5c3a21;
+    height: 2px;
+    width: 141px;
+    transform-origin: 0 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* River Text */
+.river-text {
+    position: absolute;
+    top: 225px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    color: #5c3a21;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+}
+
+/* Pieces */
+.piece {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.piece:hover {
+    transform: scale(1.1);
+}
+
+.piece.red {
+    background-color: #f5deb3;
+    color: #cc0000;
+    border: 2px solid #cc0000;
+}
+
+.piece.black {
+    background-color: #f5deb3;
+    color: #000000;
+    border: 2px solid #000000;
+}
+
+.piece.selected {
+    box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.7);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 255, 0, 0.5);
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Controls */
+.controls {
+    margin-top: 8px;
+}
+
+.difficulty-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.difficulty-row label {
+    font-weight: bold;
+    color: #5c3a21;
+}
+
+.diff-btn {
+    padding: 5px 12px;
+    border: 2px solid #8b4513;
+    border-radius: 4px;
+    background: #fff8dc;
+    color: #5c3a21;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.diff-btn:hover {
+    background: #deb887;
+}
+
+.diff-btn.active {
+    background: #8b4513;
+    color: #fff8dc;
+    font-weight: bold;
+}
+
+#ai-label {
+    font-size: 13px;
+    color: #8b4513;
+    margin-bottom: 6px;
+}
+
+#reset-btn {
+    padding: 8px 20px;
+    background-color: #8b4513;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+    margin-bottom: 6px;
+}
+
+#reset-btn:hover {
+    background-color: #a0522d;
+}
+
+#status {
+    font-size: 18px;
+    font-weight: bold;
+    color: #5c3a21;
+    margin-top: 4px;
+}
