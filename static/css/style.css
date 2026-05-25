@@ -111,40 +111,56 @@ h2 {
 
 /* Pieces */
 .piece {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
+    transition: transform 0.15s;
     z-index: 10;
     pointer-events: none;
+    /* 3-D coin effect */
+    box-shadow: 0 3px 0 rgba(0,0,0,0.45), 0 4px 6px rgba(0,0,0,0.35);
 }
 
 .piece:hover {
-    transform: scale(1.1);
+    transform: scale(1.12);
 }
 
+/* Red pieces: warm ivory base with deep red text and border */
 .piece.red {
-    background-color: #f5deb3;
-    color: #cc0000;
-    border: 2px solid #cc0000;
+    background: radial-gradient(circle at 35% 35%, #fff8e1, #f0c040);
+    color: #8b0000;
+    border: 3px solid #990000;
+    text-shadow: 0 1px 0 rgba(255,255,200,0.8);
 }
 
+/* Black pieces: dark slate base with cream text and border */
 .piece.black {
-    background-color: #f5deb3;
-    color: #000000;
-    border: 2px solid #000000;
+    background: radial-gradient(circle at 35% 35%, #5a5a5a, #1a1a1a);
+    color: #f0e6c8;
+    border: 3px solid #111;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.8);
 }
 
 .piece.selected {
-    box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.7);
+    box-shadow: 0 0 0 4px rgba(50, 220, 50, 0.9), 0 4px 8px rgba(0,0,0,0.5);
+    transform: scale(1.08);
+}
+
+/* Forbidden move flash */
+.piece.forbidden-flash {
+    animation: forbidden-pulse 0.4s ease 3;
+}
+@keyframes forbidden-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,30,30,0.9); }
+    50%  { box-shadow: 0 0 0 8px rgba(255,30,30,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,30,30,0); }
 }
 
 .dot {
@@ -226,3 +242,37 @@ h2 {
     color: #5c3a21;
     margin-top: 4px;
 }
+
+/* Forbidden move warning banner */
+#forbidden-warning {
+    display: none;
+    background: #c0392b;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin: 6px auto;
+    font-size: 15px;
+    font-weight: bold;
+    max-width: 440px;
+    text-align: center;
+    animation: slide-in 0.3s ease;
+}
+#forbidden-warning.show { display: block; }
+
+@keyframes slide-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Thought panel entries */
+.thought-turn {
+    font-weight: bold;
+    color: #5c3a21;
+    margin-top: 8px;
+    border-top: 1px dashed #c9a87c;
+    padding-top: 4px;
+}
+.thought-score { color: #666; font-size: 12px; }
+.thought-mate  { color: #cc0000; font-weight: bold; }
+.thought-pv    { font-size: 12px; color: #444; line-height: 1.6; }
+.thought-trap  { color: #9b1c1c; font-style: italic; font-size: 12px; }

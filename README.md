@@ -34,8 +34,10 @@ Static Exchange Evaluation (SEE) computes the full capture exchange sequence to 
 Switch between opponents using the in-game difficulty buttons without reloading.
 
 ### AI Memory Module (`ai_memory.py`)
-- **EndingStep**: 10 pre-catalogued endgame patterns (殘局譜) — mate patterns, draw techniques, fortress defenses
-- **Opening books** per personality — Liu Dahua central cannon aggression, Hu Ronghua patient development
+- **EndingStep Win** (14 patterns): 雙俥錯殺, 馬後炮, 單俥勝單士象全, 炮仕勝雙士, 單傌勝單士, 海底撈月, 重炮殺法, 臥槽馬殺法, 釣魚馬殺法, 雙車錯殺, and more
+- **EndingStep Draw** (10 patterns): 單車對雙象守和, 單炮對單士, 雙馬對雙士(羊角士), 車炮萬年和, 馬炮對車, 士象全守和, and more
+- **8 Opening books**: 橘中秘, 夾炮屏風, 反宮馬, 五六炮, 士角炮, 龜背炮, 卒底炮, 沿河十八打
+- **Opening traps** for 擒王系統: 棄傌陷車, 重炮殺局, 當頭炮陷阱 (each rated with `catch_the_king_score`)
 - **Mid-game tactical patterns** — 閃將抽俥, 兌子入局, 兩翼包抄, 棄子攻王, 頓挫手段
 - **Positional tables** for pawns, horses, rooks, cannons, and kings
 
@@ -52,6 +54,36 @@ Each folder contains:
 - `game_record.txt` — full move-by-move record with scores
 - `game_record.json` — machine-readable with turning points indexed
 - `turn_XXX_*.png` — board screenshots at 擒王分數 major turning points
+
+## Screenshots / 盤面截圖
+
+Board images are captured automatically at 擒王分數 turning points: whenever the score delta exceeds 40 points, a mate-in-≤5 threat appears, or a major piece (rook/king) is captured.
+
+Pieces render as 3-D coins: red pieces on a gold gradient background with crimson text; black pieces on a dark slate background with cream text.
+
+### 初學者 vs 主AI (Beginner vs Main Engine)
+
+![Novice turn 30](AI_Games/AI_Novice/turn_030_TurningPoint.png)
+
+*Turn 30 — Score collapses as Main AI dismantles the Beginner's structure*
+
+---
+
+### 柳大華 vs 主AI (Liu Dahua vs Main Engine)
+
+![LiuDahua turn 45](AI_Games/AI_LiuDahua/turn_045_TurningPoint.png)
+
+*Turn 45 — Tactical exchange erupts in the middle game; score shifts sharply*
+
+---
+
+### 胡榮華 vs 主AI (Hu Ronghua vs Main Engine)
+
+![HuRonghua turn 33 MateThread](AI_Games/AI_HuRonghua/turn_033_MateThread.png)
+
+*Turn 33 — Mate threat detected (mate_in ≤ 5); decisive endgame sequence begins*
+
+---
 
 ## Getting Started
 

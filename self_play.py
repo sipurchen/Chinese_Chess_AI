@@ -14,20 +14,20 @@ from engine import (
 )
 
 # ── Constants ──────────────────────────────────────────────────────────────────
-CELL = 60          # pixels per cell
-MARGIN = 40        # board margin
+CELL = 70          # pixels per cell (enlarged for clarity)
+MARGIN = 55        # board margin
 COLS, ROWS = 9, 10
-W = CELL * (COLS - 1) + 2 * MARGIN
-H = CELL * (ROWS - 1) + 2 * MARGIN
+W = CELL * (COLS - 1) + 2 * MARGIN     # 670 px
+H = CELL * (ROWS - 1) + 2 * MARGIN     # 743 px
+HEADER_H = 40                           # title bar height
 
-BG_COLOR    = (222, 184, 135)   # burlywood
-LINE_COLOR  = (92,  58,  33)
-RED_BG      = (245, 222, 179)
-BLACK_BG    = (245, 222, 179)
-RED_FG      = (180,  0,   0)
-BLACK_FG    = (10,   10,  10)
-PALACE_CLR  = (92,  58,  33)
-HIGHLIGHT   = (50,  200,  50, 150)
+BG_COLOR   = (222, 184, 135)            # burlywood board
+LINE_COLOR = (92,  58,  33)
+RED_FG     = (139,  0,   0)             # deep crimson for red pieces
+RED_BG_C   = (255, 248, 200)            # warm ivory
+BLACK_FG   = (240, 230, 210)            # cream for black piece text
+BLACK_BG_C = (30,  30,  30)            # near-black
+HIGHLIGHT  = (50,  200,  50, 160)
 
 PIECE_NAMES_ZH = {
     'r':'車','n':'馬','b':'象','a':'士','k':'將','c':'砲','p':'卒',
@@ -69,19 +69,24 @@ def cell_to_pixel(r, c):
 
 
 def draw_board(board, highlight_move=None, title="", score=None, mate_in=None):
-    img = Image.new("RGB", (W, H + 30), BG_COLOR)
+    R_OUTER = int(CELL * 0.42)
+    R_INNER = int(CELL * 0.38)
+    R_HI    = int(CELL * 0.46)
+
+    img = Image.new("RGB", (W, H + HEADER_H), BG_COLOR)
     d = ImageDraw.Draw(img, "RGBA")
 
     # Title bar
-    d.rectangle([0, 0, W, 28], fill=(92, 58, 33))
-    d.text((10, 4), title, fill="white", font=FONT_HEADER)
+    d.rectangle([0, 0, W, HEADER_H - 2], fill=(92, 58, 33))
+    ty = (HEADER_H - 15) // 2
+    d.text((10, ty), title, fill="white", font=FONT_HEADER)
     if score is not None:
         score_str = f"Score: {score}"
         if mate_in:
-            score_str += f"  ({'擒王' if mate_in > 0 else '被擒'}在{abs(mate_in)}步)"
-        d.text((W - 200, 4), score_str, fill=(255, 220, 100), font=FONT_HEADER)
+            score_str += f"  ({'Win' if mate_in > 0 else 'Lose'} in {abs(mate_in)})"
+        d.text((W - 200, ty), score_str, fill=(255, 220, 100), font=FONT_HEADER)
 
-    offset_y = 30
+    offset_y = HEADER_H
     board_img = Image.new("RGB", (W, H), BG_COLOR)
     bd = ImageDraw.Draw(board_img, "RGBA")
 
@@ -117,7 +122,7 @@ def draw_board(board, highlight_move=None, title="", score=None, mate_in=None):
         (r1,c1),(r2,c2) = highlight_move
         for (hr,hc) in [(r1,c1),(r2,c2)]:
             hx,hy = cell_to_pixel(hr, hc)
-            bd.ellipse([hx-32,hy-32,hx+32,hy+32], fill=(80,180,80,80))
+            bd.ellipse([hx-R_HI,hy-R_HI,hx+R_HI,hy+R_HI], fill=(80,180,80,80))
 
     # Draw pieces
     for r in range(ROWS):
@@ -127,11 +132,12 @@ def draw_board(board, highlight_move=None, title="", score=None, mate_in=None):
                 continue
             px, py = cell_to_pixel(r, c)
             is_red = piece.isupper()
-            fg = RED_FG if is_red else BLACK_FG
+            fg  = RED_FG   if is_red else BLACK_FG
+            bg  = RED_BG_C if is_red else BLACK_BG_C
             # Outer circle
-            bd.ellipse([px-22,py-22,px+22,py+22], fill=(220,200,160), outline=fg, width=2)
+            bd.ellipse([px-R_OUTER,py-R_OUTER,px+R_OUTER,py+R_OUTER], fill=bg, outline=fg, width=2)
             # Inner circle
-            bd.ellipse([px-18,py-18,px+18,py+18], outline=fg, width=1)
+            bd.ellipse([px-R_INNER,py-R_INNER,px+R_INNER,py+R_INNER], outline=fg, width=1)
             # Piece character
             ch = PIECE_NAMES_ZH.get(piece, '?')
             bbox = bd.textbbox((0,0), ch, font=FONT_PIECE)
@@ -331,13 +337,18 @@ class SelfPlay:
 
 # ── Run all three matchups ─────────────────────────────────────────────────────
 
+class HuRonghuaFast(HuRonghuaAI):
+    """Depth-2 variant of HuRonghuaAI for self-play (depth 4 is ~100s/move)."""
+    SEARCH_DEPTH = 2
+
+
 def run_all():
     base_dir = os.path.join(os.path.dirname(__file__), "AI_Games")
 
     matchups = [
-        ("AI_Novice",    BeginnerAI,   ChineseChessEngine, "Novice vs MainAI"),
-        ("AI_LiuDahua",  LiuDahuaAI,  ChineseChessEngine, "LiuDahua vs MainAI"),
-        ("AI_HuRonghua", HuRonghuaAI, ChineseChessEngine, "HuRonghua vs MainAI"),
+        ("AI_Novice",    BeginnerAI,      ChineseChessEngine, "Novice vs MainAI"),
+        ("AI_LiuDahua",  LiuDahuaAI,     ChineseChessEngine, "LiuDahua vs MainAI"),
+        ("AI_HuRonghua", HuRonghuaFast,  ChineseChessEngine, "HuRonghua vs MainAI"),
     ]
 
     summaries = {}

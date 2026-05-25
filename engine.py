@@ -1,11 +1,14 @@
 import copy
+from collections import Counter
 from ai_memory import (
     PIECE_VALUES, ENDING_STEPS, POS_TABLE_RED_PAWN, POS_TABLE_RED_HORSE,
     POS_TABLE_RED_ROOK, POS_TABLE_RED_CANNON, POS_TABLE_RED_KING,
-    OPENING_BEGINNER, OPENING_LIU_DAHUA, OPENING_HU_RONGHUA
+    OPENING_BEGINNER, OPENING_LIU_DAHUA, OPENING_HU_RONGHUA,
+    FORBIDDEN_MOVE_RULES, OPENING_TRAPS,
 )
 
 MATE_SCORE = 30000
+REPETITION_LIMIT = 3   # same position this many times → forbidden move
 
 
 class ChineseChessEngine:
@@ -30,7 +33,9 @@ class ChineseChessEngine:
         self.turn = 'red'
         self.history = []
         self.move_count = 0
-        self.position_history = []
+        self.position_history = []      # full board-key history
+        self.position_counts = Counter() # board-key -> count
+        self.forbidden_warning = None   # set when repetition detected
 
     # ── Board helpers ─────────────────────────────────────────────────────────
 
@@ -70,13 +75,51 @@ class ChineseChessEngine:
         self.board[r1][c1] = '.'
 
         self.move_count += 1
-        self.position_history.append(self.board_key(self.board))
+        bkey = self.board_key(self.board)
+        self.position_history.append(bkey)
+        self.position_counts[bkey] += 1
 
         opponent = self.get_next_turn(self.turn)
         in_check = self.is_in_check(self.board, opponent)
+
+        # ── 禁止著法偵測 ────────────────────────────────────
+        # 局面重複 >= REPETITION_LIMIT 次時發出警告
+        forbidden_warning = None
+        if self.position_counts[bkey] >= REPETITION_LIMIT:
+            if in_check:
+                forbidden_warning = {
+                    'type': 'perpetual_check',
+                    'name': FORBIDDEN_MOVE_RULES['perpetual_check']['name'],
+                    'advice': FORBIDDEN_MOVE_RULES['perpetual_check']['advice'],
+                    'mover': self.turn,   # who just moved = the perpetual checker
+                }
+            else:
+                forbidden_warning = {
+                    'type': 'repetition',
+                    'name': '循環重複',
+                    'advice': '局面出現3次重複，主動方必須變著，否則判負',
+                    'mover': self.turn,
+                }
+        self.forbidden_warning = forbidden_warning
         self.turn = opponent
 
-        return {'game_over': game_over, 'winner': winner, 'in_check': in_check}
+        return {
+            'game_over': game_over,
+            'winner': winner,
+            'in_check': in_check,
+            'forbidden_warning': forbidden_warning,
+        }
+
+    def check_repetition_before_move(self, move):
+        """Return forbidden type if this move would create a repetition."""
+        temp = self.make_move_internal(self.board, move)
+        bkey = self.board_key(temp)
+        count = self.position_counts.get(bkey, 0) + 1
+        if count >= REPETITION_LIMIT:
+            opponent = self.get_next_turn(self.turn)
+            in_check = self.is_in_check(temp, opponent)
+            return 'perpetual_check' if in_check else 'repetition'
+        return None
 
     def format_move(self, move):
         if not move:
@@ -563,7 +606,12 @@ class ChineseChessEngine:
 
         moves = self.order_moves(self.board, moves, self.turn)
 
-        for move in moves:
+        # Separate moves into non-repetition and repetition to prefer non-repetition
+        non_rep_moves = [m for m in moves
+                         if not self.check_repetition_before_move(m)]
+        candidate_moves = non_rep_moves if non_rep_moves else moves
+
+        for move in candidate_moves:
             new_board = self.make_move_internal(self.board, move)
             score, pv = self.alpha_beta(new_board, depth-1, -beta, -alpha,
                                         self.get_next_turn(self.turn), force_draw_mode)
@@ -587,6 +635,9 @@ class ChineseChessEngine:
             })
             temp[r2][c2] = temp[r1][c1]; temp[r1][c1] = '.'
 
+        # Warn if best move still leads to repetition (all moves repeat)
+        rep_type = self.check_repetition_before_move(best_move) if best_move else None
+
         thought = {
             'turn': self.turn,
             'best_move': self.format_move(best_move),
@@ -595,7 +646,10 @@ class ChineseChessEngine:
             'pv': [self.format_move(m) for m in best_pv],
             'detailed_pv': detailed_pv,
             'mate_in': self.calculate_mate_in(best_score),
+            'forbidden_warning': self.forbidden_warning,
+            'repetition_move': rep_type,
         }
+        self.forbidden_warning = None  # reset after read
         self.history.append(thought)
         self.save_log()
 

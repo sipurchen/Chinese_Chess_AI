@@ -1,4 +1,4 @@
-=== 棋譜: HuRonghua(紅) vs MainAI(黑) ===
+=== 棋譜: 胡榮華(紅) vs 主AI(黑) ===
 結果: Black wins stalemate
 
 步數    方    棋子       起            落            分數       ±        擒王

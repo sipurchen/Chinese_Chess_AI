@@ -53,6 +53,11 @@ def move():
             if red_analysis:
                 red_thought = red_analysis.get('thought')
 
+    forbidden = (
+        player_result.get('forbidden_warning') or
+        ai_result.get('forbidden_warning')
+    )
+
     return jsonify({
         'status': 'game_over' if ai_result.get('game_over') else 'ok',
         'move': ai_move,
@@ -62,6 +67,7 @@ def move():
         'winner': ai_result.get('winner'),
         'in_check': ai_result.get('in_check', False) or player_result.get('in_check', False),
         'ai_name': getattr(engine, 'NAME', 'AI'),
+        'forbidden_warning': forbidden,
     })
 
 @app.route('/reset', methods=['POST'])

@@ -224,11 +224,13 @@ function movePiece(r1, c1, r2, c2) {
                 return;
             }
 
+            // Show forbidden warning if any
+            showForbiddenWarning(data.forbidden_warning);
+
             if (data.in_check) {
-                statusDiv.innerText = "將軍!";
-                // Visual cue?
+                statusDiv.innerText = "將軍！";
                 document.body.style.backgroundColor = "#ffcccc";
-                setTimeout(() => document.body.style.backgroundColor = "#f0e6d2", 500);
+                setTimeout(() => document.body.style.backgroundColor = "#f0e6d2", 600);
             } else {
                 statusDiv.innerText = turn === 'red' ? "紅方回合" : "黑方回合";
             }
@@ -257,40 +259,92 @@ function movePiece(r1, c1, r2, c2) {
                     updateThoughtPanel('red-thought', data.red_thought);
                 }
 
+                // Forbidden move warning
+                showForbiddenWarning(data.forbidden_warning);
+
                 // Check status again after AI move (if AI wins or checks)
                 if (data.game_over) {
-                    alert(`遊戲結束! ${data.winner === 'red' ? '紅方' : '黑方'} 獲勝!`);
                     statusDiv.innerText = `遊戲結束! ${data.winner === 'red' ? '紅方' : '黑方'} 獲勝!`;
                     hasGameStarted = false;
                 } else if (data.in_check) {
-                    statusDiv.innerText = "將軍!";
+                    statusDiv.innerText = "將軍！";
                     document.body.style.backgroundColor = "#ffcccc";
-                    setTimeout(() => document.body.style.backgroundColor = "#f0e6d2", 500);
+                    setTimeout(() => document.body.style.backgroundColor = "#f0e6d2", 600);
                 }
             }
         });
+}
+
+function showForbiddenWarning(warning) {
+    const el = document.getElementById('forbidden-warning');
+    if (!el) return;
+    if (!warning) {
+        el.classList.remove('show');
+        el.innerText = '';
+        return;
+    }
+    const name = warning.name || '禁止著法';
+    const advice = warning.advice || '必須變著！';
+    const mover = warning.mover === 'red' ? '紅方' : '黑方';
+    el.innerText = `⚠ ${name}！${mover}${advice}`;
+    el.classList.add('show');
+    // auto-hide after 5s
+    setTimeout(() => el.classList.remove('show'), 5000);
 }
 
 function updateThoughtPanel(elementId, thought) {
     const panel = document.getElementById(elementId);
     if (!panel) return;
 
-    let text = `分數: ${thought.score} (變化: ${thought.score_change > 0 ? '+' : ''}${thought.score_change})\n`;
-    if (thought.mate_in) {
-        text += `幾步殺: ${thought.mate_in} 步\n`;
+    panel.innerHTML = '';
+
+    // Score line
+    const scoreLine = document.createElement('div');
+    scoreLine.className = 'thought-score';
+    const delta = thought.score_change;
+    scoreLine.textContent = `分數: ${thought.score}  (${delta >= 0 ? '+' : ''}${delta})`;
+    panel.appendChild(scoreLine);
+
+    // Mate-in line
+    if (thought.mate_in !== null && thought.mate_in !== undefined) {
+        const mateLine = document.createElement('div');
+        mateLine.className = 'thought-mate';
+        const steps = Math.abs(thought.mate_in);
+        mateLine.textContent = thought.mate_in > 0
+            ? `擒王在 ${steps} 步內！`
+            : `被擒王威脅（${steps} 步）`;
+        panel.appendChild(mateLine);
     }
-    text += `\n思考路線:\n`;
-    if (thought.detailed_pv) {
+
+    // PV moves
+    if (thought.detailed_pv && thought.detailed_pv.length > 0) {
+        const pvDiv = document.createElement('div');
+        pvDiv.className = 'thought-pv';
+        pvDiv.textContent = '思考路線:';
+        panel.appendChild(pvDiv);
         thought.detailed_pv.forEach((step, i) => {
-            text += `${i + 1}. ${step.move_str}\n`;
-        });
-    } else if (thought.pv) {
-        // Fallback
-        thought.pv.forEach((m, i) => {
-            text += `${i + 1}. (${m.r1},${m.c1})->(${m.r2},${m.c2})\n`;
+            const line = document.createElement('div');
+            line.className = 'thought-pv';
+            line.textContent = `  ${i + 1}. ${step.move_str}`;
+            panel.appendChild(line);
         });
     }
-    panel.innerText = text;
+
+    // Forbidden warning in panel too
+    if (thought.forbidden_warning) {
+        const warn = document.createElement('div');
+        warn.className = 'thought-trap';
+        warn.textContent = `⚠ ${thought.forbidden_warning.name}: ${thought.forbidden_warning.advice}`;
+        panel.appendChild(warn);
+    }
+
+    // Trap warning (repetition_move)
+    if (thought.repetition_move) {
+        const warn = document.createElement('div');
+        warn.className = 'thought-trap';
+        warn.textContent = `※ 此步造成局面重複，AI已改選其他著法`;
+        panel.appendChild(warn);
+    }
 }
 
 resetBtn.addEventListener('click', () => {

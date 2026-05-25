@@ -65,6 +65,35 @@ Record of user commands that shaped this project. Each entry captures the origin
 
 ---
 
+### Command 3: Session 3 Enhancements
+
+```
+1. 殘局追加炮仕勝雙士、單傌勝單士、海底撈月(俥炮中帥勝單車)等知名殘局(gemini cli搜尋)
+2. 殘局追加必和殘局(gemini cli搜尋)
+3. 禁止著法提醒變著
+4. 中局變化與開局定式增加橘中秘與夾炮屏風、反宮馬、五六炮、士角砲、龜背炮、卒底包、
+   沿河十八打等開局變化，擒王系統僅記錄特殊開局陷阱棄傌陷車、重炮等(gemini cli搜尋)
+5. 紅黑雙方顯示要更清晰
+6. 截圖要更完整，顯示整個盤面，並加入到README.MD中
+```
+
+**Result:**
+- `ai_memory.py` expanded to 14 winning endgame patterns (ENDING_STEPS_WIN):
+  炮仕勝雙士, 單傌勝單士, 海底撈月, 重炮殺法, 臥槽馬殺法, 炮打底士接俥底殺, 釣魚馬殺法, 雙車錯殺
+- `ai_memory.py` added 10 mandatory draw patterns (ENDING_STEPS_DRAW):
+  單車對雙象守和, 單炮對單士, 雙馬對雙士(羊角士), 車炮萬年和, 馬炮對車, 士象全守和, etc.
+- Added 禁止著法 (forbidden move) detection: 長將 / 長捉 / 長將捉; AI avoids repetition moves
+- 8 new opening books added: 橘中秘, 夾炮屏風, 反宮馬, 五六炮, 士角炮, 龜背炮, 卒底炮, 沿河十八打
+- `OPENING_TRAPS` added for 擒王系統: 棄傌陷車, 重炮殺局, 當頭炮陷阱 (each with catch_the_king_score)
+- Red/black piece styling improved: red = gold gradient coins, black = dark slate coins, 3D shadow effect
+- Board renderer enlarged: CELL=70 (was 60), MARGIN=55 (was 40), proportional piece radii
+- `draw_board()` updated: HEADER_H=40px title bar, RED_BG_C/BLACK_BG_C piece backgrounds
+- Forbidden move warning banner added to UI (red alert, auto-hide 5s, slide-in animation)
+- Thought panels restructured with styled divs: score delta, mate-in threat, PV moves, trap warnings
+- Self-play re-run with larger board size; screenshots added to README.md gallery section
+
+---
+
 ## Conventions
 
 - All new R&D happens on branch `Caught_the_king`

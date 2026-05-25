@@ -40,22 +40,56 @@
     {
       "move_num": 3,
       "turn": "red",
-      "piece": "俥",
+      "piece": "炮",
       "from": [
-        9,
-        0
+        7,
+        7
       ],
       "to": [
-        9,
-        1
+        0,
+        7
       ],
-      "score": 10,
-      "score_delta": -14,
+      "score": -20,
+      "score_delta": -44,
       "mate_in": null,
-      "captured": "砲"
+      "captured": "馬"
     },
     {
       "move_num": 4,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        0,
+        8
+      ],
+      "to": [
+        0,
+        7
+      ],
+      "score": 30,
+      "score_delta": 50,
+      "mate_in": null,
+      "captured": "炮"
+    },
+    {
+      "move_num": 5,
+      "turn": "red",
+      "piece": "兵",
+      "from": [
+        5,
+        0
+      ],
+      "to": [
+        4,
+        0
+      ],
+      "score": -45,
+      "score_delta": -75,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 6,
       "turn": "black",
       "piece": "砲",
       "from": [
@@ -66,44 +100,10 @@
         2,
         4
       ],
-      "score": 19,
-      "score_delta": 9,
+      "score": 88,
+      "score_delta": 133,
       "mate_in": null,
       "captured": null
-    },
-    {
-      "move_num": 5,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        7,
-        1
-      ],
-      "to": [
-        7,
-        2
-      ],
-      "score": 10,
-      "score_delta": -9,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 6,
-      "turn": "black",
-      "piece": "砲",
-      "from": [
-        2,
-        4
-      ],
-      "to": [
-        6,
-        4
-      ],
-      "score": 19,
-      "score_delta": 9,
-      "mate_in": null,
-      "captured": "兵"
     },
     {
       "move_num": 7,
@@ -117,8 +117,8 @@
         5,
         2
       ],
-      "score": 2,
-      "score_delta": -17,
+      "score": -45,
+      "score_delta": -133,
       "mate_in": null,
       "captured": null
     },
@@ -127,20 +127,88 @@
       "turn": "black",
       "piece": "砲",
       "from": [
-        6,
+        2,
         4
       ],
       "to": [
         6,
-        2
+        4
       ],
-      "score": 46,
-      "score_delta": 44,
+      "score": 117,
+      "score_delta": 162,
+      "mate_in": null,
+      "captured": "兵"
+    },
+    {
+      "move_num": 9,
+      "turn": "red",
+      "piece": "俥",
+      "from": [
+        9,
+        0
+      ],
+      "to": [
+        9,
+        1
+      ],
+      "score": -16,
+      "score_delta": -133,
+      "mate_in": null,
+      "captured": "砲"
+    },
+    {
+      "move_num": 10,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        0,
+        7
+      ],
+      "to": [
+        6,
+        7
+      ],
+      "score": 111,
+      "score_delta": 127,
       "mate_in": null,
       "captured": null
     },
     {
-      "move_num": 9,
+      "move_num": 11,
+      "turn": "red",
+      "piece": "炮",
+      "from": [
+        7,
+        1
+      ],
+      "to": [
+        7,
+        6
+      ],
+      "score": -8,
+      "score_delta": -119,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 12,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        6,
+        7
+      ],
+      "to": [
+        6,
+        6
+      ],
+      "score": 108,
+      "score_delta": 116,
+      "mate_in": null,
+      "captured": "兵"
+    },
+    {
+      "move_num": 13,
       "turn": "red",
       "piece": "兵",
       "from": [
@@ -151,95 +219,27 @@
         4,
         2
       ],
-      "score": 2,
-      "score_delta": -44,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 10,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        0,
-        7
-      ],
-      "to": [
-        2,
-        6
-      ],
-      "score": 74,
-      "score_delta": 72,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 11,
-      "turn": "red",
-      "piece": "兵",
-      "from": [
-        4,
-        2
-      ],
-      "to": [
-        4,
-        1
-      ],
-      "score": 2,
-      "score_delta": -72,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 12,
-      "turn": "black",
-      "piece": "卒",
-      "from": [
-        3,
-        6
-      ],
-      "to": [
-        4,
-        6
-      ],
-      "score": 88,
-      "score_delta": 86,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 13,
-      "turn": "red",
-      "piece": "兵",
-      "from": [
-        4,
-        1
-      ],
-      "to": [
-        4,
-        0
-      ],
-      "score": 2,
-      "score_delta": -86,
+      "score": -16,
+      "score_delta": -124,
       "mate_in": null,
       "captured": null
     },
     {
       "move_num": 14,
       "turn": "black",
-      "piece": "馬",
+      "piece": "卒",
       "from": [
-        2,
-        6
+        3,
+        2
       ],
       "to": [
         4,
-        5
+        2
       ],
-      "score": 97,
-      "score_delta": 95,
+      "score": 161,
+      "score_delta": 177,
       "mate_in": null,
-      "captured": null
+      "captured": "兵"
     },
     {
       "move_num": 15,
@@ -253,8 +253,8 @@
         3,
         0
       ],
-      "score": 10,
-      "score_delta": -87,
+      "score": -16,
+      "score_delta": -177,
       "mate_in": null,
       "captured": "卒"
     },
@@ -263,34 +263,34 @@
       "turn": "black",
       "piece": "馬",
       "from": [
-        4,
-        5
+        0,
+        1
       ],
       "to": [
-        6,
-        6
+        2,
+        2
       ],
-      "score": 100,
-      "score_delta": 90,
+      "score": 164,
+      "score_delta": 180,
       "mate_in": null,
-      "captured": "兵"
+      "captured": null
     },
     {
       "move_num": 17,
       "turn": "red",
-      "piece": "炮",
+      "piece": "俥",
       "from": [
-        7,
-        2
+        9,
+        1
       ],
       "to": [
         3,
-        2
+        1
       ],
-      "score": 10,
-      "score_delta": -90,
+      "score": -16,
+      "score_delta": -180,
       "mate_in": null,
-      "captured": "卒"
+      "captured": null
     },
     {
       "move_num": 18,
@@ -304,25 +304,25 @@
         3,
         0
       ],
-      "score": 95,
-      "score_delta": 85,
+      "score": 164,
+      "score_delta": 180,
       "mate_in": null,
       "captured": "兵"
     },
     {
       "move_num": 19,
       "turn": "red",
-      "piece": "炮",
+      "piece": "俥",
       "from": [
         3,
-        2
+        1
       ],
       "to": [
-        1,
-        2
+        6,
+        1
       ],
-      "score": 2,
-      "score_delta": -93,
+      "score": -24,
+      "score_delta": -188,
       "mate_in": null,
       "captured": null
     },
@@ -331,100 +331,100 @@
       "turn": "black",
       "piece": "馬",
       "from": [
-        0,
-        1
+        2,
+        2
       ],
       "to": [
-        2,
-        0
+        4,
+        3
       ],
-      "score": 112,
-      "score_delta": 110,
+      "score": 174,
+      "score_delta": 198,
       "mate_in": null,
       "captured": null
     },
     {
       "move_num": 21,
       "turn": "red",
-      "piece": "炮",
+      "piece": "俥",
       "from": [
-        1,
-        2
+        6,
+        1
       ],
       "to": [
-        1,
-        6
+        7,
+        1
       ],
-      "score": 2,
-      "score_delta": -110,
+      "score": -24,
+      "score_delta": -198,
       "mate_in": null,
       "captured": null
     },
     {
       "move_num": 22,
       "turn": "black",
-      "piece": "馬",
+      "piece": "砲",
       "from": [
         6,
-        6
+        4
       ],
       "to": [
-        4,
-        7
+        6,
+        8
       ],
-      "score": 104,
-      "score_delta": 102,
+      "score": 183,
+      "score_delta": 207,
       "mate_in": null,
-      "captured": null
+      "captured": "兵"
     },
     {
       "move_num": 23,
       "turn": "red",
-      "piece": "炮",
+      "piece": "俥",
       "from": [
         7,
-        7
+        1
       ],
       "to": [
         7,
         4
       ],
-      "score": 2,
-      "score_delta": -102,
+      "score": -32,
+      "score_delta": -215,
       "mate_in": null,
       "captured": null
     },
     {
       "move_num": 24,
       "turn": "black",
-      "piece": "砲",
+      "piece": "馬",
       "from": [
-        6,
-        2
+        4,
+        3
       ],
       "to": [
-        6,
-        4
+        5,
+        5
       ],
-      "score": 114,
-      "score_delta": 112,
+      "score": 191,
+      "score_delta": 223,
       "mate_in": null,
       "captured": null
     },
     {
       "move_num": 25,
       "turn": "red",
-      "piece": "炮",
+      "piece": "俥",
       "from": [
         7,
         4
       ],
       "to": [
         7,
-        7
+        0
       ],
-      "score": -6,
-      "score_delta": -120,
+      "score": -32,
+      "score_delta": -223,
       "mate_in": null,
       "captured": null
     },
@@ -437,390 +437,16 @@
         0
       ],
       "to": [
-        5,
+        7,
         0
       ],
-      "score": 128,
-      "score_delta": 134,
-      "mate_in": null,
-      "captured": "兵"
-    },
-    {
-      "move_num": 27,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        6
-      ],
-      "to": [
-        1,
-        5
-      ],
-      "score": -6,
-      "score_delta": -134,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 28,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        2,
-        0
-      ],
-      "to": [
-        3,
-        2
-      ],
-      "score": 156,
-      "score_delta": 162,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 29,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        5
-      ],
-      "to": [
-        1,
-        6
-      ],
-      "score": -6,
-      "score_delta": -162,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 30,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        5,
-        0
-      ],
-      "to": [
-        5,
-        1
-      ],
-      "score": 164,
-      "score_delta": 170,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 31,
-      "turn": "red",
-      "piece": "俥",
-      "from": [
-        9,
-        1
-      ],
-      "to": [
-        5,
-        1
-      ],
-      "score": -6,
-      "score_delta": -170,
-      "mate_in": null,
-      "captured": "車"
-    },
-    {
-      "move_num": 32,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        3,
-        2
-      ],
-      "to": [
-        5,
-        1
-      ],
-      "score": 150,
-      "score_delta": 156,
+      "score": 213,
+      "score_delta": 245,
       "mate_in": null,
       "captured": "俥"
     },
     {
-      "move_num": 33,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        6
-      ],
-      "to": [
-        1,
-        7
-      ],
-      "score": -6,
-      "score_delta": -156,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 34,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        0,
-        8
-      ],
-      "to": [
-        0,
-        7
-      ],
-      "score": 156,
-      "score_delta": 162,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 35,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        7
-      ],
-      "to": [
-        1,
-        6
-      ],
-      "score": -6,
-      "score_delta": -162,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 36,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        0,
-        7
-      ],
-      "to": [
-        0,
-        8
-      ],
-      "score": 150,
-      "score_delta": 156,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 37,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        6
-      ],
-      "to": [
-        1,
-        3
-      ],
-      "score": -6,
-      "score_delta": -156,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 38,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        5,
-        1
-      ],
-      "to": [
-        6,
-        3
-      ],
-      "score": 162,
-      "score_delta": 168,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 39,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        3
-      ],
-      "to": [
-        1,
-        5
-      ],
-      "score": -6,
-      "score_delta": -168,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 40,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        6,
-        3
-      ],
-      "to": [
-        8,
-        2
-      ],
-      "score": 180,
-      "score_delta": 186,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 41,
-      "turn": "red",
-      "piece": "帥",
-      "from": [
-        9,
-        4
-      ],
-      "to": [
-        8,
-        4
-      ],
-      "score": -6,
-      "score_delta": -186,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 42,
-      "turn": "black",
-      "piece": "馬",
-      "from": [
-        8,
-        2
-      ],
-      "to": [
-        6,
-        3
-      ],
-      "score": 176,
-      "score_delta": 182,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 43,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        7,
-        7
-      ],
-      "to": [
-        7,
-        3
-      ],
-      "score": -6,
-      "score_delta": -182,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 44,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        0,
-        8
-      ],
-      "to": [
-        1,
-        8
-      ],
-      "score": 170,
-      "score_delta": 176,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 45,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        1,
-        5
-      ],
-      "to": [
-        2,
-        5
-      ],
-      "score": -6,
-      "score_delta": -176,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 46,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        1,
-        8
-      ],
-      "to": [
-        1,
-        5
-      ],
-      "score": 178,
-      "score_delta": 184,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 47,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        2,
-        5
-      ],
-      "to": [
-        8,
-        5
-      ],
-      "score": -6,
-      "score_delta": -184,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 48,
-      "turn": "black",
-      "piece": "士",
-      "from": [
-        0,
-        3
-      ],
-      "to": [
-        1,
-        4
-      ],
-      "score": 178,
-      "score_delta": 184,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 49,
+      "move_num": 27,
       "turn": "red",
       "piece": "相",
       "from": [
@@ -831,166 +457,171 @@
         7,
         0
       ],
-      "score": -6,
-      "score_delta": -184,
+      "score": -42,
+      "score_delta": -255,
+      "mate_in": null,
+      "captured": "車"
+    },
+    {
+      "move_num": 28,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        6,
+        6
+      ],
+      "to": [
+        6,
+        4
+      ],
+      "score": 207,
+      "score_delta": 249,
       "mate_in": null,
       "captured": null
     },
     {
-      "move_num": 50,
-      "turn": "black",
-      "piece": "車",
+      "move_num": 29,
+      "turn": "red",
+      "piece": "炮",
       "from": [
-        1,
+        7,
+        6
+      ],
+      "to": [
+        7,
+        4
+      ],
+      "score": -62,
+      "score_delta": -269,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 30,
+      "turn": "black",
+      "piece": "馬",
+      "from": [
+        5,
         5
       ],
       "to": [
         7,
-        5
-      ],
-      "score": 180,
-      "score_delta": 186,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 51,
-      "turn": "red",
-      "piece": "炮",
-      "from": [
-        8,
-        5
-      ],
-      "to": [
-        0,
-        5
-      ],
-      "score": -31,
-      "score_delta": -211,
-      "mate_in": null,
-      "captured": "士"
-    },
-    {
-      "move_num": 52,
-      "turn": "black",
-      "piece": "將",
-      "from": [
-        0,
         4
       ],
-      "to": [
-        0,
-        5
-      ],
-      "score": 235,
-      "score_delta": 266,
+      "score": 207,
+      "score_delta": 269,
       "mate_in": null,
       "captured": "炮"
     },
     {
-      "move_num": 53,
+      "move_num": 31,
       "turn": "red",
-      "piece": "傌",
+      "piece": "仕",
       "from": [
         9,
-        7
-      ],
-      "to": [
-        7,
-        6
-      ],
-      "score": -66,
-      "score_delta": -301,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 54,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        7,
-        5
-      ],
-      "to": [
-        7,
-        6
-      ],
-      "score": 261,
-      "score_delta": 327,
-      "mate_in": null,
-      "captured": "傌"
-    },
-    {
-      "move_num": 55,
-      "turn": "red",
-      "piece": "俥",
-      "from": [
-        9,
-        8
-      ],
-      "to": [
-        7,
-        8
-      ],
-      "score": -86,
-      "score_delta": -347,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 56,
-      "turn": "black",
-      "piece": "車",
-      "from": [
-        7,
-        6
+        3
       ],
       "to": [
         8,
-        6
+        4
       ],
-      "score": 265,
-      "score_delta": 351,
+      "score": -77,
+      "score_delta": -284,
       "mate_in": null,
       "captured": null
     },
     {
-      "move_num": 57,
-      "turn": "red",
-      "piece": "帥",
-      "from": [
-        8,
-        4
-      ],
-      "to": [
-        7,
-        4
-      ],
-      "score": -86,
-      "score_delta": -351,
-      "mate_in": null,
-      "captured": null
-    },
-    {
-      "move_num": 58,
+      "move_num": 32,
       "turn": "black",
       "piece": "馬",
       "from": [
-        4,
-        7
+        7,
+        4
+      ],
+      "to": [
+        8,
+        6
+      ],
+      "score": 350,
+      "score_delta": 427,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 33,
+      "turn": "red",
+      "piece": "帥",
+      "from": [
+        9,
+        4
+      ],
+      "to": [
+        9,
+        3
+      ],
+      "score": -167,
+      "score_delta": -517,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 34,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        6,
+        4
       ],
       "to": [
         6,
-        6
+        3
+      ],
+      "score": 350,
+      "score_delta": 517,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 35,
+      "turn": "red",
+      "piece": "仕",
+      "from": [
+        8,
+        4
+      ],
+      "to": [
+        7,
+        3
+      ],
+      "score": -167,
+      "score_delta": -517,
+      "mate_in": null,
+      "captured": null
+    },
+    {
+      "move_num": 36,
+      "turn": "black",
+      "piece": "車",
+      "from": [
+        6,
+        3
+      ],
+      "to": [
+        7,
+        3
       ],
       "score": 29992,
-      "score_delta": 30078,
+      "score_delta": 30159,
       "mate_in": 8,
-      "captured": null
+      "captured": "仕"
     }
   ],
   "turning_points": [
+    3,
+    4,
+    5,
+    6,
+    7,
     8,
     9,
     10,
@@ -1019,31 +650,14 @@
     33,
     34,
     35,
-    36,
-    37,
-    38,
-    39,
-    40,
-    41,
-    42,
-    43,
-    44,
-    45,
-    46,
-    47,
-    48,
-    49,
-    50,
-    51,
-    52,
-    53,
-    54,
-    55,
-    56,
-    57,
-    58
+    36
   ],
   "screenshots": [
+    "turn_003_TurningPoint.png",
+    "turn_004_TurningPoint.png",
+    "turn_005_TurningPoint.png",
+    "turn_006_TurningPoint.png",
+    "turn_007_TurningPoint.png",
     "turn_008_TurningPoint.png",
     "turn_009_TurningPoint.png",
     "turn_010_TurningPoint.png",
@@ -1072,28 +686,6 @@
     "turn_033_TurningPoint.png",
     "turn_034_TurningPoint.png",
     "turn_035_TurningPoint.png",
-    "turn_036_TurningPoint.png",
-    "turn_037_TurningPoint.png",
-    "turn_038_TurningPoint.png",
-    "turn_039_TurningPoint.png",
-    "turn_040_TurningPoint.png",
-    "turn_041_TurningPoint.png",
-    "turn_042_TurningPoint.png",
-    "turn_043_TurningPoint.png",
-    "turn_044_TurningPoint.png",
-    "turn_045_TurningPoint.png",
-    "turn_046_TurningPoint.png",
-    "turn_047_TurningPoint.png",
-    "turn_048_TurningPoint.png",
-    "turn_049_TurningPoint.png",
-    "turn_050_TurningPoint.png",
-    "turn_051_TurningPoint.png",
-    "turn_052_TurningPoint.png",
-    "turn_053_TurningPoint.png",
-    "turn_054_TurningPoint.png",
-    "turn_055_TurningPoint.png",
-    "turn_056_TurningPoint.png",
-    "turn_057_TurningPoint.png",
-    "turn_058_TurningPoint.png"
+    "turn_036_TurningPoint.png"
   ]
 }
