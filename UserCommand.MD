@@ -119,6 +119,49 @@ Record of user commands that shaped this project. Each entry captures the origin
 
 ---
 
+### Command 5: AI棋手Wiki + 賽事系統 + 四模式UI + 殘局解題 + 武俠規劃
+
+```
+1. 認真的用gemini cli查所有對局並記錄於柳大華和胡榮華兩位AI對手的棋譜，
+   包含分析一併建構成微型wiki，讓兩位AI對手的棋力能夠有模仿對象的風格
+2. 讓三位AI對手間互相對局練習100次並留下對局記錄，並由AI棋手在旁觀戰並分析學習，
+   這個內容必須能夠在當前的flask UI上呈現和重現
+3. 目前的UI介面應該要有人機對奕/AI對奕/AI棋手分析棋局/AI棋手試解殘局
+4. AI棋手試解殘局的部份需要提供擺譜功能，並且要有讓AI對手和AI棋手試錯解局的選項，
+   解開的殘局加入記憶中，並可在試解殘局中調閱解法，擺譜功能也可比對類似殘局提供選取
+5. 開始準備跟其他AI(Codex ChatGPT5.4/Antigravity Gemini 3 flash)協作，
+   以下一階段為武俠仙人對奕風格WebUI App進行規劃
+```
+
+**Result:**
+- `ai_wiki/LiuDahua_Wiki.md` 建立柳大華微型wiki（棋風、慣用開局、中局手段、殘局技巧、代表對局）
+- `ai_wiki/HuRonghua_Wiki.md` 建立胡榮華微型wiki（同上，含10屆全國冠軍風格分析）
+- `ai_tournament.py` 賽事系統完成：
+  - `BeginnerTournament/LiuTournament/HuTournament`（depth=2 快速版）
+  - `start_tournament(session_id, games_per_pair)` → 背景 daemon thread
+  - `get_status/list_tournament_games/load_tournament_game` API
+  - 觀戰分析：ChineseChessEngine 在重大轉折點（分差>40/擒王≤5/先手≥3）介入分析
+  - 結果儲存 `AI_Games/tournament/<session_id>/`
+- `ai_endgame.py` 殘局管理器新建：
+  - 5 道內建經典殘局（雙俥錯、俥炮聯攻、馬後砲、傌踩連環、車馬協攻）
+  - `solve_puzzle(board, turn, depth)` → 引擎解題
+  - `find_similar(board)` → Sørensen-Dice 相似度搜索
+  - `save_puzzle/get_library` → 使用者殘局持久化
+- `app.py` 全面重寫，新增路由：
+  - `/tournament/start|status|sessions|replay`
+  - `/games/list|load` + `/analyze`
+  - `/endgame/library|solve|save|similar`
+- `templates/index.html` 全面重寫：四模式標籤頁、三欄佈局、棋子調色盤
+- `static/css/style.css` 全面更新：武俠紅金主題 Header、棋子調色盤、進度條、走法列表
+- `static/js/main.js` 全面重寫（750行+）：
+  - Mode 1（人機對弈）：完整保留原有功能
+  - Mode 2（AI對弈）：賽事啟動、輪詢進度、對局回放（precomputeBoards + 步進/自動播放）
+  - Mode 3（分析棋局）：載入棋局、步進導航、一鍵AI分析
+  - Mode 4（試解殘局）：棋子調色盤擺棋（左鍵放、右鍵刪）、AI解題、相似殘局、儲存
+- `Others_AI_Planning.md` 武俠仙人對弈 WebUI App 完整規劃文件（美術方向/角色系統/棋道點數/技術架構/里程碑）
+
+---
+
 ## Conventions
 
 - All new R&D happens on branch `Caught_the_king`

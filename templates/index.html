@@ -1,45 +1,216 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中國象棋 AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
-    <div class="main-layout">
-        <div class="panel left-panel">
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header id="app-header">
+    <h1 id="app-title">中國象棋 AI</h1>
+    <nav id="mode-tabs">
+        <button class="tab-btn active" data-mode="human">人機對弈</button>
+        <button class="tab-btn" data-mode="tournament">AI 對弈</button>
+        <button class="tab-btn" data-mode="analysis">分析棋局</button>
+        <button class="tab-btn" data-mode="endgame">試解殘局</button>
+    </nav>
+</header>
+
+<!-- ── Main three-column layout ────────────────────────────────────────────── -->
+<div id="main-layout">
+
+    <!-- ── Left Panel ───────────────────────────────────────────────────────── -->
+    <aside class="side-panel" id="left-panel">
+
+        <!-- MODE: human -->
+        <div class="panel-block" data-panel="human">
             <h2>黑方思路</h2>
-            <div id="black-thought">等待中...</div>
+            <div id="black-thought" class="thought-panel">等待中…</div>
         </div>
 
-        <div class="container">
-            <h1>中國象棋 AI</h1>
-            <div id="game-board" class="board">
-                <!-- Grid lines and pieces will be generated here -->
+        <!-- MODE: tournament -->
+        <div class="panel-block hidden" data-panel="tournament">
+            <h2>賽事設置</h2>
+            <div class="form-row">
+                <label>每對局數：</label>
+                <select id="trn-gpp">
+                    <option value="5">5 局</option>
+                    <option value="10" selected>10 局</option>
+                    <option value="20">20 局</option>
+                </select>
             </div>
-            <div class="controls">
-                <div class="difficulty-row">
-                    <label>AI 對手：</label>
-                    <button class="diff-btn active" data-diff="easy">初學者</button>
-                    <button class="diff-btn" data-diff="medium">柳大華</button>
-                    <button class="diff-btn" data-diff="hard">胡榮華</button>
+            <button id="trn-start-btn" class="action-btn">▶ 開始賽事</button>
+            <div id="trn-progress-wrap" class="hidden">
+                <div id="trn-progress-label">進度：0 / 0</div>
+                <div id="trn-progress-bar-bg">
+                    <div id="trn-progress-bar"></div>
                 </div>
-                <div id="ai-label">當前AI：初學者</div>
-                <button id="reset-btn">重置遊戲</button>
-                <div id="status">玩家先行（紅方）</div>
-                <div id="forbidden-warning"></div>
+            </div>
+            <h2 style="margin-top:16px">積分榜</h2>
+            <div id="trn-standings">—</div>
+            <h2 style="margin-top:16px">歷史賽事</h2>
+            <div id="trn-session-list">—</div>
+        </div>
+
+        <!-- MODE: analysis -->
+        <div class="panel-block hidden" data-panel="analysis">
+            <h2>棋局記錄</h2>
+            <button id="ana-refresh-btn" class="action-btn-sm">重新整理</button>
+            <div id="ana-file-list" class="file-list">—</div>
+        </div>
+
+        <!-- MODE: endgame -->
+        <div class="panel-block hidden" data-panel="endgame">
+            <h2>殘局題庫</h2>
+            <button id="eg-lib-refresh" class="action-btn-sm">重新整理</button>
+            <div id="eg-lib-list" class="file-list">—</div>
+        </div>
+
+    </aside>
+
+    <!-- ── Centre: board + controls ─────────────────────────────────────────── -->
+    <main id="center-panel">
+
+        <div id="game-board" class="board"></div>
+        <div id="status">玩家先行 (紅方)</div>
+        <div id="forbidden-warning"></div>
+
+        <!-- CTRL: human -->
+        <div class="mode-ctrl" data-ctrl="human">
+            <div class="difficulty-row">
+                <label>AI 對手：</label>
+                <button class="diff-btn active" data-diff="easy">初學者</button>
+                <button class="diff-btn" data-diff="medium">柳大華</button>
+                <button class="diff-btn" data-diff="hard">胡榮華</button>
+            </div>
+            <div id="ai-label">當前AI：初學者</div>
+            <button id="reset-btn" class="action-btn">重置遊戲</button>
+        </div>
+
+        <!-- CTRL: tournament -->
+        <div class="mode-ctrl hidden" data-ctrl="tournament">
+            <div id="trn-game-label" class="small-label">選擇對局以回放</div>
+            <div class="replay-controls">
+                <button class="rep-btn" id="rep-first">⏮</button>
+                <button class="rep-btn" id="rep-prev">◀</button>
+                <button class="rep-btn" id="rep-play">▶</button>
+                <button class="rep-btn" id="rep-next">▶|</button>
+                <button class="rep-btn" id="rep-last">⏭</button>
+            </div>
+            <div id="rep-step-label" class="small-label">— / —</div>
+        </div>
+
+        <!-- CTRL: analysis -->
+        <div class="mode-ctrl hidden" data-ctrl="analysis">
+            <div id="ana-game-label" class="small-label">請從左側選擇棋局</div>
+            <div class="replay-controls">
+                <button class="rep-btn" id="ana-first">⏮</button>
+                <button class="rep-btn" id="ana-prev">◀</button>
+                <button class="rep-btn" id="ana-play">▶</button>
+                <button class="rep-btn" id="ana-next">▶|</button>
+                <button class="rep-btn" id="ana-last">⏭</button>
+            </div>
+            <div id="ana-step-label" class="small-label">— / —</div>
+            <button id="ana-analyze-btn" class="action-btn-sm" style="margin-top:6px">AI 分析當前局面</button>
+        </div>
+
+        <!-- CTRL: endgame -->
+        <div class="mode-ctrl hidden" data-ctrl="endgame">
+            <div class="eg-setup-row">
+                <label>先手：</label>
+                <button class="eg-turn-btn active" data-turn="red">紅方</button>
+                <button class="eg-turn-btn" data-turn="black">黑方</button>
+                <span style="margin-left:12px">深度：</span>
+                <select id="eg-depth">
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div id="eg-palette-row">
+                <span class="palette-label">紅：</span>
+                <span class="pal-piece red" data-piece="K">帥</span>
+                <span class="pal-piece red" data-piece="A">仕</span>
+                <span class="pal-piece red" data-piece="B">相</span>
+                <span class="pal-piece red" data-piece="R">俥</span>
+                <span class="pal-piece red" data-piece="N">傌</span>
+                <span class="pal-piece red" data-piece="C">炮</span>
+                <span class="pal-piece red" data-piece="P">兵</span>
+                <span class="palette-sep"></span>
+                <span class="palette-label">黑：</span>
+                <span class="pal-piece black" data-piece="k">將</span>
+                <span class="pal-piece black" data-piece="a">士</span>
+                <span class="pal-piece black" data-piece="b">象</span>
+                <span class="pal-piece black" data-piece="r">車</span>
+                <span class="pal-piece black" data-piece="n">馬</span>
+                <span class="pal-piece black" data-piece="c">砲</span>
+                <span class="pal-piece black" data-piece="p">卒</span>
+                <span class="pal-piece eraser" data-piece="." title="清除">✕</span>
+            </div>
+            <div class="eg-btn-row">
+                <button class="action-btn-sm" id="eg-solve-btn">🤖 AI解題</button>
+                <button class="action-btn-sm" id="eg-similar-btn">🔍 相似殘局</button>
+                <button class="action-btn-sm" id="eg-clear-btn">🗑 清空</button>
+                <button class="action-btn-sm" id="eg-reset-btn">↩ 初始</button>
+                <button class="action-btn-sm" id="eg-save-btn">💾 儲存</button>
             </div>
         </div>
 
-        <div class="panel right-panel">
-            <h2>紅方思路</h2>
-            <div id="red-thought">等待中...</div>
-        </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
+    </main>
 
+    <!-- ── Right Panel ───────────────────────────────────────────────────────── -->
+    <aside class="side-panel" id="right-panel">
+
+        <!-- MODE: human -->
+        <div class="panel-block" data-panel="human">
+            <h2>紅方思路</h2>
+            <div id="red-thought" class="thought-panel">等待中…</div>
+        </div>
+
+        <!-- MODE: tournament -->
+        <div class="panel-block hidden" data-panel="tournament">
+            <h2>對局列表</h2>
+            <div id="trn-game-list" class="file-list">—</div>
+            <h2 style="margin-top:12px">觀戰分析</h2>
+            <div id="trn-spectator" class="thought-panel">—</div>
+        </div>
+
+        <!-- MODE: analysis -->
+        <div class="panel-block hidden" data-panel="analysis">
+            <h2>AI 分析</h2>
+            <div id="ana-thought" class="thought-panel">—</div>
+            <h2 style="margin-top:12px">著法記錄</h2>
+            <div id="ana-movelist" class="move-list">—</div>
+        </div>
+
+        <!-- MODE: endgame -->
+        <div class="panel-block hidden" data-panel="endgame">
+            <h2>解局結果</h2>
+            <div id="eg-result" class="thought-panel">—</div>
+            <h2 style="margin-top:12px">相似殘局</h2>
+            <div id="eg-similar-list" class="file-list">—</div>
+            <div id="eg-save-form" class="hidden" style="margin-top:12px">
+                <h2>儲存殘局</h2>
+                <input type="text" id="eg-save-name" placeholder="殘局名稱" class="text-input">
+                <input type="text" id="eg-save-desc" placeholder="說明（可選）" class="text-input">
+                <input type="text" id="eg-save-tags" placeholder="標籤，逗號分隔" class="text-input">
+                <select id="eg-save-diff">
+                    <option value="easy">簡單</option>
+                    <option value="medium" selected>中等</option>
+                    <option value="hard">困難</option>
+                </select>
+                <button id="eg-save-confirm-btn" class="action-btn-sm" style="margin-top:4px">確認儲存</button>
+                <button id="eg-save-cancel-btn" class="action-btn-sm" style="margin-top:4px">取消</button>
+            </div>
+        </div>
+
+    </aside>
+
+</div><!-- #main-layout -->
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
 </html>
