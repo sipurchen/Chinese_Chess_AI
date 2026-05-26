@@ -94,6 +94,31 @@ Record of user commands that shaped this project. Each entry captures the origin
 
 ---
 
+### Command 4: 古譜開局 + 雙方先手 + 解殺還殺
+
+```
+1. 增加新譜：中炮盤頭馬  梅花譜 適情雅趣 百局象棋譜
+2. 目前的重大轉折不夠重大，應該要增加計算雙方先手，
+   即雙方擒王步數相比，何者更快則分數應有加成
+3. 考慮解殺還殺(gemini cli搜尋並補足相關盤面)
+```
+
+**Result:**
+- `ai_memory.py` 新增 4 本古譜開局書庫：
+  - **中炮盤頭馬**: 雙傌並駐七路（盤頭），俥二縱深突破，7步合法棋步
+  - **梅花譜**（清・王再越）: 炮八平九讓路→俥八進六飛車6格→邊炮跟進夾擊
+  - **適情雅趣**（明・徐芝）: 右翼傌俥先發→俥縱深→炮八進四深入河界
+  - **百局象棋譜**（清・三樂居士）: 兵七先動→俥走帥道穩陣，步步為營
+  - 全部 28 步（含 Black 鏡像 28 步）均通過合法性驗證
+- `ai_memory.py` MIDGAME_PATTERNS 新增解殺還殺系列（解殺還殺、棄子解殺還殺、雙將解殺、先手連將）
+- `engine.py` 解殺還殺 (order_moves): 被將時先試算 counter_checks，排序最前
+- `engine.py` 雙方先手 (get_best_move): _quick_mate_threat + thought 含 opponent_threat_in / initiative_advantage
+- `self_play.py` 轉折點新增 mate_gain / init_gap / init_flip 三條件，截圖標籤升級
+- LiuDahuaAI / HuRonghuaAI 每局隨機從 3 本兼容開局書庫中選一本
+- 提交: 4fab33c → Caught_the_king
+
+---
+
 ## Conventions
 
 - All new R&D happens on branch `Caught_the_king`
