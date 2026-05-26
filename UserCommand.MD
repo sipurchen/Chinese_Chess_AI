@@ -162,6 +162,64 @@ Record of user commands that shaped this project. Each entry captures the origin
 
 ---
 
+### Command 6: 規劃文件更新 + 擒王理論深化 + Web_UI_App 分支
+
+```
+1. 將規劃寫入Others_AI.MD 和 UserCommand.MD中，完成後git commit push，
+   開新分支Web_UI_App 切分出去
+2. 繼續完善擒王理論部份，確認AI棋手是依照棋規和理論與AI對手進行對局後，
+   再加入開局定式、中局變化和殘局推衍輔助
+```
+
+**Result:**
+- `Others_AI.MD` 全面更新，新增第七~十二章：
+  - Session 4（古譜/雙方先手/解殺還殺）詳解
+  - Session 5（Wiki/賽事/四模式UI/殘局）詳解
+  - Session 6（擒王理論深化）完整技術說明
+  - 分支策略表（master/Caught_the_king/Web_UI_App）
+  - 當前技術架構全覽（含所有模組/路由/評估層）
+  - 武俠 App 下一階段預告
+- `UserCommand.MD` 新增 Session 6 記錄
+- `engine.py` 擒王理論深化，7項改進：
+
+  **1. 轉置表（TT）**
+  - `TT_EXACT/TT_LOWER/TT_UPPER` 標記
+  - `MAX_TT_SIZE = 150_000` 條目
+  - `alpha_beta()` 內查詢 + 儲存；TT最佳著法優先排序
+  - 預估深度4速度提升 3~5×
+
+  **2. 擒王一步偵測**
+  - `_find_mate_in_one()` — O(legal_moves) 快速掃描
+  - `get_best_move()` 開頭先呼叫，立即返回絕殺著法
+  - thought 標記 `source='mate_in_1'`, `mate_in=1`
+
+  **3. 殺手著法（Killer Moves）**
+  - `self.killers = {}` 每次搜索清空
+  - beta cut + 安靜著法 → 記錄至 `killers[depth]`（最多2個）
+  - `order_moves(depth=0)` 加入 killer 優先層
+
+  **4. 殘局模式偵測**
+  - `is_endgame()` — 重子（俥/炮）≤3 即殘局
+  - `_ENDGAME_VALUE_ADJUST`：傌+10/炮-10/兵+5
+  - 殘局帥將活躍度加分（中路距離 + 推進距離）
+  - 過河深兵加分 +18
+
+  **5. 開局定式辨識**
+  - `classify_opening()` — 偵測當頭炮/過宮炮/飛相局
+  - `opening_phase()` — 開局判斷（主力棋子≥14在初始區）
+  - 開局書 thought 輸出 `opening_tag` + `opening_name`
+
+  **6. 中局機動性評分**
+  - 非開局非殘局：`(my_moves - opp_moves) // 4` 加分
+
+  **7. 共用開局書方法**
+  - `_try_opening_move(max_moves)` 消除 Liu/Hu 重複代碼
+  - 顏色無關（黑方自動鏡像），偏離時自動轉搜索
+
+- **新建分支 `Web_UI_App`**（從 Caught_the_king 切出），供武俠 WebUI App 研發使用
+
+---
+
 ## Conventions
 
 - All new R&D happens on branch `Caught_the_king`

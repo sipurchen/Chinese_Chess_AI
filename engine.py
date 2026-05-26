@@ -12,14 +12,24 @@ from ai_memory import (
 MATE_SCORE = 30000
 REPETITION_LIMIT = 3   # same position this many times → forbidden move
 
+# ── 轉置表 (Transposition Table) flags ────────────────────────────────────────
+TT_EXACT = 0   # exact minimax value
+TT_LOWER = 1   # lower bound (failed high / beta cut)
+TT_UPPER = 2   # upper bound (failed low / alpha cut)
+MAX_TT_SIZE = 150_000  # max TT entries; evict oldest when full
+
 
 class ChineseChessEngine:
     """Core rules engine: move generation, legal-move filtering, check detection."""
 
     def __init__(self):
+        self.tt      = {}   # Transposition table
+        self.killers = {}   # killer_moves[depth] = [move, ...]
         self.reset_board()
 
     def reset_board(self):
+        self.tt      = {}
+        self.killers = {}
         self.board = [
             ['r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'],
             ['.', '.', '.', '.', '.', '.', '.', '.', '.'],
@@ -344,6 +354,20 @@ class ChineseChessEngine:
                                    turn, False)
         return self.calculate_mate_in(score)
 
+    def _find_mate_in_one(self, board, turn):
+        """
+        擒王一步偵測：scan all legal moves for an immediate checkmate.
+        Much cheaper than a full depth search — only costs O(legal_moves).
+        Returns the mating move-tuple if found, else None.
+        """
+        opp = self.get_next_turn(turn)
+        for move in self.generate_legal_moves(board, turn):
+            nb = self.make_move_internal(board, move)
+            # Win condition A: opponent has no legal moves while in check
+            if self.is_in_check(nb, opp) and not self.generate_legal_moves(nb, opp):
+                return move
+        return None
+
     # ── 子根理論: Root theory piece valuation ──────────────────────────────────
     #
     # Given a target piece A at (ar, ac):
@@ -478,9 +502,55 @@ class ChineseChessEngine:
             if board[r][c] != '.' and self.is_own_piece(board[r][c], turn)
         )
 
+    def is_endgame(self, board):
+        """
+        殘局判斷：consider it endgame when heavy pieces (俥/車/炮/砲) total ≤ 3.
+        In endgame: king activity increases, horse > cannon, passed pawns matter more.
+        """
+        heavy = sum(
+            1 for r in range(10) for c in range(9)
+            if board[r][c].lower() in ('r', 'c')
+        )
+        return heavy <= 3
+
+    def opening_phase(self, board):
+        """開局判斷：pieces barely moved from starting squares."""
+        home_pieces = sum(
+            1 for r in (0, 1, 2, 7, 8, 9) for c in range(9)
+            if board[r][c] not in ('.', 'K', 'k')
+        )
+        return home_pieces >= 14  # most pieces still at home
+
+    def classify_opening(self, board):
+        """
+        開局定式辨識：identify the opponent's opening type by inspecting
+        the first few moved pieces.  Returns a tag string.
+        Used by AI to know which counter-opening to apply.
+        """
+        # Red cannon placement: 炮二平五 → 當頭炮
+        if board[7][4] == 'C':
+            return 'red_central_cannon'
+        # Red cannon on 3rd/7th file
+        if board[7][6] == 'C' or board[7][2] == 'C':
+            return 'red_side_cannon'
+        # Red elephant opening: 相飛
+        if board[7][2] == '.' and board[5][2] == 'B':
+            return 'red_elephant'
+        return 'unknown'
+
+    # ── 殘局棋子價值調整表 ─────────────────────────────────────────────────────
+    # In endgame: horses are more powerful than cannons (fewer screens to jump over),
+    # pawns deep in enemy territory are very dangerous.
+    _ENDGAME_VALUE_ADJUST = {
+        'n': +10, 'N': +10,   # horse bonus in endgame
+        'c': -10, 'C': -10,   # cannon penalty in endgame (fewer screens)
+        'p':  +5, 'P':  +5,   # pawn bonus in endgame
+    }
+
     def evaluate_board(self, board, turn, force_draw_mode=False):
         red_king = black_king = False
         score = 0
+        endgame = self.is_endgame(board)
 
         for r in range(10):
             for c in range(9):
@@ -497,12 +567,15 @@ class ChineseChessEngine:
 
                 val = PIECE_VALUES.get(piece, 0) + self.get_pos_bonus(piece, r, c)
 
+                # 殘局棋子調整 (endgame piece value adjustment)
+                if endgame:
+                    val += self._ENDGAME_VALUE_ADJUST.get(piece.lower(), 0)
+
                 # 子根理論: adjust value by defender presence
                 opponent = 'black' if piece.isupper() else 'red'
                 rt = self.root_type(board, r, c, opponent)
-                # Opponent capturing this piece: rootless means we're in danger
                 if rt == 'rootless':
-                    val -= 8   # This piece can be captured freely → reduce its contribution
+                    val -= 8
                 elif rt == 'false_root':
                     val -= 3
 
@@ -518,6 +591,37 @@ class ChineseChessEngine:
             if not black_king: return -MATE_SCORE
             if not red_king:   return  MATE_SCORE
 
+        # ── 殘局推衍：king activity bonus ───────────────────────────────────
+        if endgame:
+            my_king = self.find_king(board, turn)
+            if my_king:
+                kr, kc = my_king
+                # Reward king near center column (col 4) and advanced rows
+                col_bonus = (2 - abs(kc - 4)) * 4
+                row_advance = (9 - kr) * 2 if turn == 'red' else kr * 2
+                score += col_bonus + row_advance
+
+            # Passed pawn deep in enemy territory
+            for r in range(10):
+                for c in range(9):
+                    piece = board[r][c]
+                    if piece == 'P' and r <= 2:     # Red pawn near enemy palace
+                        if self.is_own_piece(piece, turn):
+                            score += 18
+                        else:
+                            score -= 18
+                    elif piece == 'p' and r >= 7:   # Black pawn near red palace
+                        if self.is_own_piece(piece, turn):
+                            score += 18
+                        else:
+                            score -= 18
+
+        # ── 中局手段：mobility bonus ────────────────────────────────────────
+        elif not self.opening_phase(board):
+            my_moves_count = len(self.generate_pseudo_legal_moves(board, turn))
+            opp_moves_count = len(self.generate_pseudo_legal_moves(board, self.get_next_turn(turn)))
+            score += (my_moves_count - opp_moves_count) // 4
+
         if force_draw_mode:
             score += self.count_pieces(board, turn) * 5
 
@@ -525,18 +629,17 @@ class ChineseChessEngine:
 
     # ── Alpha-beta search ─────────────────────────────────────────────────────
 
-    def order_moves(self, board, moves, turn):
+    def order_moves(self, board, moves, turn, depth=0):
         """
         Move ordering with 解殺還殺 (counter-kill) priority.
 
-        When our side is under check:
-          1. Counter-checks  (解殺還殺 — we check back immediately)
-          2. Captures that escape check
-          3. Other legal defenses
+        Priority layers:
+          1. Counter-checks when under check (解殺還殺)
+          2. Good captures (MVV-LVA via SEE)
+          3. Killer moves at this depth (殺手著法)
+          4. Quiet moves
 
-        When not in check (normal ordering):
-          1. Good captures by SEE (MVV-LVA)
-          2. Quiet moves
+        depth: current search depth, used for killer-move lookup.
         """
         opp = self.get_next_turn(turn)
         in_check = self.is_in_check(board, turn)
@@ -552,12 +655,10 @@ class ChineseChessEngine:
                 else:
                     defenses.append(move)
 
-            # Within counter-checks: captures first (highest value victim first)
             def cc_key(m):
                 t = board[m[1][0]][m[1][1]]
                 return -PIECE_VALUES.get(t, 0) if t != '.' else 1
 
-            # Within defenses: captures (good SEE) first
             def def_key(m):
                 t = board[m[1][0]][m[1][1]]
                 if t != '.':
@@ -569,14 +670,19 @@ class ChineseChessEngine:
             defenses.sort(key=def_key)
             return counter_checks + defenses
 
-        # ── Normal ordering: good captures → quiet ────────────────────
+        # ── Normal ordering: captures → killers → quiet ───────────────
+        killers = self.killers.get(depth, [])
+
         def priority(move):
-            (r1,c1),(r2,c2) = move
+            (r1, c1), (r2, c2) = move
             target = board[r2][c2]
             if target != '.':
                 see = self.static_exchange_evaluation(board, move, turn)
-                return (0, -see)
-            return (1, 0)
+                return (0, -see, 0)      # captures first, best SEE first
+            if move in killers:
+                idx = killers.index(move)
+                return (1, idx, 0)       # killer moves second
+            return (2, 0, 0)             # quiet moves last
 
         return sorted(moves, key=priority)
 
@@ -609,29 +715,61 @@ class ChineseChessEngine:
 
         return alpha
 
-    def alpha_beta(self, board, depth, alpha, beta, turn, force_draw_mode, pv_line=None):
+    def alpha_beta(self, board, depth, alpha, beta, turn, force_draw_mode,
+                   pv_line=None):
+        """
+        Negamax alpha-beta with:
+        - 轉置表 (Transposition Table) for result caching
+        - 殺手著法 (Killer moves) for better quiet-move ordering
+        - Distance-to-mate tiebreaker (faster mates rank higher)
+        """
+        original_alpha = alpha
+
+        # ── 轉置表 lookup ───────────────────────────────────────────────────
+        bkey    = self.board_key(board)
+        tt_key  = (bkey, turn)
+        tt_best = None
+
+        if tt_key in self.tt:
+            tt_depth, tt_score, tt_flag, tt_pv = self.tt[tt_key]
+            if tt_depth >= depth:
+                if tt_flag == TT_EXACT:
+                    return tt_score, tt_pv
+                elif tt_flag == TT_LOWER:
+                    alpha = max(alpha, tt_score)
+                elif tt_flag == TT_UPPER:
+                    beta  = min(beta,  tt_score)
+                if alpha >= beta:
+                    return tt_score, tt_pv
+            if tt_pv:
+                tt_best = tt_pv[0]   # Use TT best move first for ordering
+
         if depth == 0:
             return self.quiescence(board, alpha, beta, turn, force_draw_mode), []
 
         moves = self.generate_legal_moves(board, turn)
         if not moves:
-            # No legal moves: checkmate or stalemate
             if self.is_in_check(board, turn):
-                return -(MATE_SCORE - (10 - depth)), []  # Checkmate: closer = worse
-            return 0, []  # Stalemate/困斃 = draw
+                return -(MATE_SCORE - (10 - depth)), []   # Checkmate
+            return 0, []                                   # Stalemate/困斃 = draw
 
-        moves = self.order_moves(board, moves, turn)
+        moves = self.order_moves(board, moves, turn, depth)
+
+        # TT best move goes first for faster cutoffs
+        if tt_best and tt_best in moves:
+            moves.remove(tt_best)
+            moves.insert(0, tt_best)
 
         best_score = -float('inf')
-        best_pv = []
+        best_pv    = []
 
         for move in moves:
             new_board = self.make_move_internal(board, move)
-            score, pv = self.alpha_beta(new_board, depth-1, -beta, -alpha,
+            score, pv = self.alpha_beta(new_board, depth - 1, -beta, -alpha,
                                         self.get_next_turn(turn), force_draw_mode)
             score = -score
 
-            # Distance-to-mate adjustment (prefer faster mates)
+            # Distance-to-mate: prefer faster mates
             if score > MATE_SCORE - 100:
                 score -= 1
             elif score < -(MATE_SCORE - 100):
@@ -639,10 +777,27 @@ class ChineseChessEngine:
 
             if score > best_score:
                 best_score = score
-                best_pv = [move] + pv
+                best_pv    = [move] + pv
+
             alpha = max(alpha, score)
             if alpha >= beta:
+                # ── 殺手著法更新 (beta cut = killer candidate) ─────────
+                target = board[move[1][0]][move[1][1]]
+                if target == '.':    # Only quiet moves as killers
+                    ks = self.killers.get(depth, [])
+                    if move not in ks:
+                        self.killers[depth] = ([move] + ks)[:2]  # keep 2 killers
                 break
+
+        # ── 轉置表 store ────────────────────────────────────────────────────
+        if len(self.tt) < MAX_TT_SIZE:
+            if best_score <= original_alpha:
+                flag = TT_UPPER
+            elif best_score >= beta:
+                flag = TT_LOWER
+            else:
+                flag = TT_EXACT
+            self.tt[tt_key] = (depth, best_score, flag, best_pv)
 
         return best_score, best_pv
 
@@ -650,6 +805,38 @@ class ChineseChessEngine:
         moves = self.generate_legal_moves(self.board, self.turn)
         if not moves:
             return None
+
+        # ── 擒王一步偵測：fastest possible win check ──────────────────────
+        m1 = self._find_mate_in_one(self.board, self.turn)
+        if m1:
+            current_eval = self.evaluate_board(self.board, self.turn)
+            score1 = MATE_SCORE - 1
+            fmt1 = self.format_move(m1)
+            thought1 = {
+                'turn': self.turn,
+                'best_move': fmt1,
+                'score': score1,
+                'score_change': score1 - current_eval,
+                'pv': [fmt1],
+                'detailed_pv': [{
+                    'piece': self.get_piece_name(self.board[m1[0][0]][m1[0][1]]),
+                    'from': m1[0], 'to': m1[1],
+                    'move_str': f'擒王一步！ {self.get_piece_name(self.board[m1[0][0]][m1[0][1]])} '
+                                f'({m1[0][0]},{m1[0][1]})->({m1[1][0]},{m1[1][1]})',
+                }],
+                'mate_in': 1,
+                'opponent_threat_in': None,
+                'initiative_advantage': 10,
+                'forbidden_warning': None,
+                'repetition_move': None,
+                'source': 'mate_in_1',
+            }
+            self.history.append(thought1)
+            self.save_log()
+            return {'move': fmt1, 'thought': thought1}
+
+        # Clear per-search killer table (fresh ordering each call)
+        self.killers = {}
 
         current_eval = self.evaluate_board(self.board, self.turn)
         force_draw_mode = current_eval < -200
@@ -659,7 +846,7 @@ class ChineseChessEngine:
         best_pv = []
         alpha, beta = -float('inf'), float('inf')
 
-        moves = self.order_moves(self.board, moves, self.turn)
+        moves = self.order_moves(self.board, moves, self.turn, depth)
 
         # Separate moves into non-repetition and repetition to prefer non-repetition
         non_rep_moves = [m for m in moves
@@ -851,33 +1038,67 @@ class LiuDahuaAI(ChineseChessEngine):
 
         return score
 
+    def _try_opening_move(self, max_moves: int):
+        """
+        共用開局書查詢邏輯。
+        Returns a move-result dict from opening book, or None if exhausted/illegal.
+        Supports color-independent books via mirror transform for Black.
+        """
+        if self.opening_moves_used >= max_moves:
+            return None
+        book_moves = self.opening_book.get("start", [])
+        if not book_moves or self.opening_moves_used >= len(book_moves):
+            return None
+
+        move_tuple, _ = book_moves[self.opening_moves_used]
+
+        # Mirror: book is written from Red's perspective
+        if self.turn == 'black':
+            (r1, c1), (r2, c2) = move_tuple
+            move_tuple = ((9 - r1, 8 - c1), (9 - r2, 8 - c2))
+
+        legal = self.generate_legal_moves(self.board, self.turn)
+        self.opening_moves_used += 1
+
+        if move_tuple not in legal:
+            # Opponent deviated — log but fall through to search
+            return None
+
+        r1, c1 = move_tuple[0]
+        r2, c2 = move_tuple[1]
+        fmt = {'r1': r1, 'c1': c1, 'r2': r2, 'c2': c2}
+        # Annotate with opening classifier info
+        opening_tag = self.classify_opening(self.board)
+        thought = {
+            'turn': self.turn,
+            'best_move': fmt,
+            'score': 0,
+            'score_change': 0,
+            'pv': [fmt],
+            'detailed_pv': [{
+                'piece': self.get_piece_name(self.board[r1][c1]),
+                'from': (r1, c1), 'to': (r2, c2),
+                'move_str': f'開局定式 [{self.opening_book.get("name","?")}] '
+                            f'step {self.opening_moves_used}  ({opening_tag})',
+            }],
+            'mate_in': None,
+            'opponent_threat_in': None,
+            'initiative_advantage': None,
+            'forbidden_warning': None,
+            'repetition_move': None,
+            'source': 'opening_book',
+            'opening_name': self.opening_book.get('name', '?'),
+            'opening_tag': opening_tag,
+        }
+        self.history.append(thought)
+        return {'move': fmt, 'thought': thought}
+
     def get_best_move(self, depth=None):
         depth = self.SEARCH_DEPTH
 
-        # Opening book: first 5 moves, color-independent
-        if self.opening_moves_used < 5:
-            book_moves = self.opening_book.get("start", [])
-            if book_moves and self.opening_moves_used < len(book_moves):
-                move_tuple, weight = book_moves[self.opening_moves_used]
-                # Book is written from red's perspective; mirror when playing black
-                if self.turn == 'black':
-                    (r1,c1),(r2,c2) = move_tuple
-                    move_tuple = ((9-r1, 8-c1), (9-r2, 8-c2))
-                legal = self.generate_legal_moves(self.board, self.turn)
-                if move_tuple in legal:
-                    self.opening_moves_used += 1
-                    r1,c1 = move_tuple[0]
-                    r2,c2 = move_tuple[1]
-                    fmt = {'r1':r1,'c1':c1,'r2':r2,'c2':c2}
-                    thought = {
-                        'turn': self.turn, 'best_move': fmt, 'score': 0,
-                        'score_change': 0, 'pv': [fmt], 'detailed_pv': [],
-                        'mate_in': None, 'source': 'opening_book'
-                    }
-                    self.history.append(thought)
-                    return {'move': fmt, 'thought': thought}
-                # Book move illegal (opponent diverged) — skip to search
-                self.opening_moves_used += 1
+        ob = self._try_opening_move(max_moves=5)
+        if ob:
+            return ob
 
         return super().get_best_move(depth)
 
@@ -936,30 +1157,9 @@ class HuRonghuaAI(ChineseChessEngine):
     def get_best_move(self, depth=None):
         depth = self.SEARCH_DEPTH
 
-        # Opening book: first 8 moves, color-independent
-        if self.opening_moves_used < 8:
-            book_moves = self.opening_book.get("start", [])
-            if book_moves and self.opening_moves_used < len(book_moves):
-                move_tuple, weight = book_moves[self.opening_moves_used]
-                # Book is written from red's perspective; mirror when playing black
-                if self.turn == 'black':
-                    (r1,c1),(r2,c2) = move_tuple
-                    move_tuple = ((9-r1, 8-c1), (9-r2, 8-c2))
-                legal = self.generate_legal_moves(self.board, self.turn)
-                if move_tuple in legal:
-                    self.opening_moves_used += 1
-                    r1,c1 = move_tuple[0]
-                    r2,c2 = move_tuple[1]
-                    fmt = {'r1':r1,'c1':c1,'r2':r2,'c2':c2}
-                    thought = {
-                        'turn': self.turn, 'best_move': fmt, 'score': 0,
-                        'score_change': 0, 'pv': [fmt], 'detailed_pv': [],
-                        'mate_in': None, 'source': 'opening_book'
-                    }
-                    self.history.append(thought)
-                    return {'move': fmt, 'thought': thought}
-                # Book move illegal (opponent diverged) — skip to search
-                self.opening_moves_used += 1
+        ob = self._try_opening_move(max_moves=8)
+        if ob:
+            return ob
 
         return super().get_best_move(depth)
 
