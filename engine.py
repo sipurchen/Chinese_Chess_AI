@@ -4,6 +4,8 @@ from ai_memory import (
     PIECE_VALUES, ENDING_STEPS, POS_TABLE_RED_PAWN, POS_TABLE_RED_HORSE,
     POS_TABLE_RED_ROOK, POS_TABLE_RED_CANNON, POS_TABLE_RED_KING,
     OPENING_BEGINNER, OPENING_LIU_DAHUA, OPENING_HU_RONGHUA,
+    OPENING_ZHONG_PAO_PAN_TOU_MA, OPENING_MEIHUA_PU,
+    OPENING_SHI_QING_YA_QU, OPENING_BAI_JU_PU,
     FORBIDDEN_MOVE_RULES, OPENING_TRAPS,
 )
 
@@ -332,6 +334,16 @@ class ChineseChessEngine:
             return -(score + MATE_SCORE)
         return None
 
+    def _quick_mate_threat(self, board, turn, depth=2):
+        """
+        雙方先手計算：shallow search to find if `turn` can force mate within `depth` moves.
+        Returns the mate-in count (positive = turn can mate), or None.
+        Used to compare both sides'擒王速度 without full-depth overhead.
+        """
+        score, _ = self.alpha_beta(board, depth, -float('inf'), float('inf'),
+                                   turn, False)
+        return self.calculate_mate_in(score)
+
     # ── 子根理論: Root theory piece valuation ──────────────────────────────────
     #
     # Given a target piece A at (ar, ac):
@@ -514,15 +526,58 @@ class ChineseChessEngine:
     # ── Alpha-beta search ─────────────────────────────────────────────────────
 
     def order_moves(self, board, moves, turn):
-        """Move ordering: captures first, then checks, then quiet moves."""
+        """
+        Move ordering with 解殺還殺 (counter-kill) priority.
+
+        When our side is under check:
+          1. Counter-checks  (解殺還殺 — we check back immediately)
+          2. Captures that escape check
+          3. Other legal defenses
+
+        When not in check (normal ordering):
+          1. Good captures by SEE (MVV-LVA)
+          2. Quiet moves
+        """
+        opp = self.get_next_turn(turn)
+        in_check = self.is_in_check(board, turn)
+
+        if in_check:
+            # ── 解殺還殺：split into counter-checks and defenses ──────
+            counter_checks = []
+            defenses       = []
+            for move in moves:
+                tmp = self.make_move_internal(board, move)
+                if self.is_in_check(tmp, opp):
+                    counter_checks.append(move)
+                else:
+                    defenses.append(move)
+
+            # Within counter-checks: captures first (highest value victim first)
+            def cc_key(m):
+                t = board[m[1][0]][m[1][1]]
+                return -PIECE_VALUES.get(t, 0) if t != '.' else 1
+
+            # Within defenses: captures (good SEE) first
+            def def_key(m):
+                t = board[m[1][0]][m[1][1]]
+                if t != '.':
+                    see = self.static_exchange_evaluation(board, m, turn)
+                    return (0, -see)
+                return (1, 0)
+
+            counter_checks.sort(key=cc_key)
+            defenses.sort(key=def_key)
+            return counter_checks + defenses
+
+        # ── Normal ordering: good captures → quiet ────────────────────
         def priority(move):
             (r1,c1),(r2,c2) = move
             target = board[r2][c2]
             if target != '.':
-                # MVV-LVA: most valuable victim, least valuable attacker
                 see = self.static_exchange_evaluation(board, move, turn)
-                return (0, -see)  # captures first, good captures before bad
-            return (1, 0)  # quiet moves last
+                return (0, -see)
+            return (1, 0)
+
         return sorted(moves, key=priority)
 
     def quiescence(self, board, alpha, beta, turn, force_draw_mode, qdepth=4):
@@ -638,6 +693,23 @@ class ChineseChessEngine:
         # Warn if best move still leads to repetition (all moves repeat)
         rep_type = self.check_repetition_before_move(best_move) if best_move else None
 
+        # ── 雙方先手：assess opponent's fastest threat from CURRENT board ──
+        # Quick depth-2 search from opponent's view before our move is applied.
+        # This tells us: "opponent could threaten mate-in-N right now."
+        opp_turn = self.get_next_turn(self.turn)
+        opp_threat_depth = self._quick_mate_threat(self.board, opp_turn, depth=2)
+
+        my_mate_in = self.calculate_mate_in(best_score)
+
+        # Initiative advantage: positive = we're faster, negative = opponent faster
+        initiative_advantage = None
+        if my_mate_in is not None and opp_threat_depth is not None:
+            initiative_advantage = opp_threat_depth - my_mate_in   # higher = better for us
+        elif my_mate_in is not None:
+            initiative_advantage = 10   # we can mate, they can't
+        elif opp_threat_depth is not None:
+            initiative_advantage = -10  # they can mate, we can't
+
         thought = {
             'turn': self.turn,
             'best_move': self.format_move(best_move),
@@ -645,7 +717,9 @@ class ChineseChessEngine:
             'score_change': best_score - current_eval,
             'pv': [self.format_move(m) for m in best_pv],
             'detailed_pv': detailed_pv,
-            'mate_in': self.calculate_mate_in(best_score),
+            'mate_in': my_mate_in,
+            'opponent_threat_in': opp_threat_depth,   # 對方擒王速度
+            'initiative_advantage': initiative_advantage,  # 先手差 (正=我快)
             'forbidden_warning': self.forbidden_warning,
             'repetition_move': rep_type,
         }
@@ -747,15 +821,20 @@ class BeginnerAI(ChineseChessEngine):
 class LiuDahuaAI(ChineseChessEngine):
     """
     柳大華快棋風格 AI: depth 3, tactical, prefers active pieces and quick attack.
-    Opening book based on central cannon + aggressive development.
-    Reference: Liu Dahua's rapid-game style - direct, tactical, forcing variations.
+    Opening book: randomly selects from aggressive classic manuals per game.
+      - OPENING_LIU_DAHUA   (柳大華快棋原譜)
+      - OPENING_MEIHUA_PU   (梅花譜·縱車飛炮)
+      - OPENING_SHI_QING_YA_QU (適情雅趣·右翼速攻)
     """
     SEARCH_DEPTH = 3
     NAME = "柳大華"
+    # Aggressive opening books this AI personality draws from
+    _OPENING_POOL = [OPENING_LIU_DAHUA, OPENING_MEIHUA_PU, OPENING_SHI_QING_YA_QU]
 
     def __init__(self):
+        import random
         super().__init__()
-        self.opening_book = OPENING_LIU_DAHUA
+        self.opening_book = random.choice(self._OPENING_POOL)
         self.opening_moves_used = 0
 
     def evaluate_board(self, board, turn, force_draw_mode=False):
@@ -807,14 +886,20 @@ class HuRonghuaAI(ChineseChessEngine):
     """
     胡榮華棋譜風格 AI: depth 4, deep positional play, patient endgame technique.
     Reference: Hu Ronghua's style - precise calculation, strong endgame, strategic.
-    Prefers positional sacrifices and long-term planning over short-term tactics.
+    Opening book: randomly selects from positional classic manuals per game.
+      - OPENING_HU_RONGHUA          (胡榮華棋譜原譜)
+      - OPENING_ZHONG_PAO_PAN_TOU_MA (中炮盤頭馬)
+      - OPENING_BAI_JU_PU            (百局象棋譜·穩健守中)
     """
     SEARCH_DEPTH = 4
     NAME = "胡榮華"
+    # Positional/strategic opening books this AI personality draws from
+    _OPENING_POOL = [OPENING_HU_RONGHUA, OPENING_ZHONG_PAO_PAN_TOU_MA, OPENING_BAI_JU_PU]
 
     def __init__(self):
+        import random
         super().__init__()
-        self.opening_book = OPENING_HU_RONGHUA
+        self.opening_book = random.choice(self._OPENING_POOL)
         self.opening_moves_used = 0
 
     def evaluate_board(self, board, turn, force_draw_mode=False):

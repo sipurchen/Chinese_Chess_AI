@@ -246,6 +246,12 @@ class SelfPlay:
         move_num   = 0
         result     = "Unfinished"
 
+        # ── 雙方先手追蹤 ─────────────────────────────────────────
+        # 分別記錄紅黑上次的 mate_in 與 initiative_advantage，
+        # 偵測先手方向是否易手或差距突然拉大。
+        last_mate   = {'red': None, 'black': None}
+        last_init   = {'red': None, 'black': None}
+
         for half_move in range(MAX_MOVES * 2):
             turn = turn_order[half_move % 2]
             engine = engines[turn]
@@ -263,23 +269,58 @@ class SelfPlay:
             move_num    += 1
             score        = thought['score'] if thought else 0
             mate_in      = thought.get('mate_in') if thought else None
+            opp_threat   = thought.get('opponent_threat_in') if thought else None
+            initiative   = thought.get('initiative_advantage') if thought else None
 
             # Apply move to shared board
             self.board[r2][c2] = self.board[r1][c1]
             self.board[r1][c1] = '.'
 
             delta = abs(score - prev_score)
+
+            # ── 雙方先手轉折判斷（三個新條件）───────────────────────
+            # ① 本方剛獲得擒王先手（上一步沒有，現在有）
+            mate_gain = (mate_in is not None and last_mate[turn] is None)
+            # ② 雙方擒王速度差距 ≥ 3 步（initiative_advantage 絕對值大）
+            init_gap  = (initiative is not None and abs(initiative) >= 3)
+            # ③ 先手方向易手（上一步正，現在負，或反之）
+            init_flip = (
+                initiative is not None
+                and last_init[turn] is not None
+                and initiative * last_init[turn] < 0
+            )
+
             is_turning = (
                 delta >= TURNING_THRESHOLD
                 or (mate_in is not None and mate_in <= 5)
                 or (captured in ('俥','車','帥','將'))
+                or mate_gain
+                or init_gap
+                or init_flip
             )
+
+            # 更新追蹤值（在 is_turning 判斷後更新）
+            last_mate[turn] = mate_in
+            last_init[turn] = initiative
 
             if is_turning:
                 self.record.turning_points.append(move_num)
-                label = "TurningPoint" if delta >= TURNING_THRESHOLD else "MateThread"
+                # Determine specific label
                 if captured in ('帥','將'):
                     label = "CatchKing"
+                elif mate_in is not None and mate_in <= 3:
+                    label = "MateIn3"
+                elif init_flip:
+                    label = "InitiativeFlip"
+                elif init_gap and initiative is not None:
+                    label = f"InitGap{initiative:+d}"
+                elif mate_gain:
+                    label = "MateGained"
+                elif delta >= TURNING_THRESHOLD:
+                    label = "TurningPoint"
+                else:
+                    label = "MateThread"
+
                 self.save_screenshot(
                     copy.deepcopy(self.board),
                     ((r1,c1),(r2,c2)),
@@ -307,8 +348,11 @@ class SelfPlay:
                 break
 
             turn_char = 'R' if turn == 'red' else 'B'
-            turn_pt = f"[TURN_POINT delta={delta:+d}]" if is_turning else ""
-            print(f"  {turn_char}{move_num:3d} {piece_char:2s} ({r1},{c1})->({r2},{c2})  score={score:+5d}  {turn_pt}")
+            init_str  = f" init={initiative:+d}" if initiative is not None else ""
+            opp_str   = f" opp={opp_threat}步殺" if opp_threat else ""
+            turn_pt   = f" [TURN:{label}]" if is_turning else ""
+            print(f"  {turn_char}{move_num:3d} {piece_char:2s} ({r1},{c1})->({r2},{c2})"
+                  f"  score={score:+5d}{init_str}{opp_str}{turn_pt}")
 
         else:
             result = "Draw by move limit"
