@@ -390,5 +390,64 @@ Self-Play (self_play.py)
 
 ---
 
-*文件建立時間：2026-05-26 | 最後更新：2026-05-27*
-*當前分支：`Caught_the_king` (引擎研發) / `Web_UI_App` (介面研發)*
+---
+
+## 十三、Session 7 — 2026-05-28：分支策略重組 + 路徑隱私清潔
+
+### 13.1 分支重組
+
+| 操作 | 說明 |
+|------|------|
+| `Caught_the_king` → merge → `master` | Fast-forward merge（144 files，81f956b→615d59a）|
+| `master` rename → `Caught_the_king_master` | 穩定版分支改名 |
+| `Caught_the_king` 刪除 | Local + Remote 移除 |
+| 新建 `Caught_the_king_dev` | 往後 擒王理論 主要研發分支 |
+
+**新分支策略：**
+
+```
+Caught_the_king_master  ← 穩定版（原 master + Caught_the_king 合併）
+Caught_the_king_dev     ← 擒王理論 R&D（主要工作分支）
+Web_UI_App              ← 武俠仙人對弈 WebUI App
+```
+
+### 13.2 路徑隱私清潔
+
+**問題**：`self_play.py` 硬編碼 Windows 字體路徑：
+```python
+# 原始（含本機隱私）
+r"C:\Windows\Fonts\simsun.ttc"
+r"C:\Windows\Fonts\simhei.ttf"
+```
+
+**修復**：改為跨平台動態路徑：
+```python
+import sys
+if sys.platform == "win32":
+    _win_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
+    candidates = [os.path.join(_win_fonts, f) for f in font_names]
+elif sys.platform == "darwin":
+    candidates = ["/System/Library/Fonts/...", ...]
+else:  # Linux
+    candidates = ["/usr/share/fonts/opentype/noto/...", ...]
+```
+
+- 不暴露本機磁碟代號 (E: C: D:)
+- 使用 `%WINDIR%` 環境變數取得系統目錄
+- 支援 Windows / macOS / Linux 三平台
+
+### 13.3 已確認無本機路徑的模組
+
+| 模組 | 路徑策略 |
+|------|---------|
+| `engine.py` | 無檔案 I/O |
+| `ai_memory.py` | 無檔案 I/O |
+| `ai_endgame.py` | `os.path.dirname(__file__)` 相對路徑 |
+| `ai_tournament.py` | `os.path.dirname(__file__)` 相對路徑 |
+| `app.py` | `os.path.dirname(__file__)` 相對路徑 |
+| `self_play.py` | ✅ Session 7 已修復，改為跨平台字體查找 |
+
+---
+
+*文件建立時間：2026-05-26 | 最後更新：2026-05-28*
+*當前分支：`Caught_the_king_dev` (擒王理論研發) / `Web_UI_App` (介面研發)*

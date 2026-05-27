@@ -114,27 +114,35 @@ python self_play.py
 
 ```
 chinese_chess_ai/
-├── engine.py          # Core rules engine + three AI personalities
-├── ai_memory.py       # Endgame patterns, opening books, positional tables
-├── app.py             # Flask server
-├── self_play.py       # AI vs AI simulation + board renderer
+├── engine.py              # Core rules engine + three AI personalities
+│                          #   擒王分數, 子根理論, transposition table, killer moves
+├── ai_memory.py           # Endgame patterns, opening books, positional tables
+├── ai_tournament.py       # 100-game round-robin tournament system
+├── ai_endgame.py          # Endgame puzzle library + AI solver
+├── app.py                 # Flask server (4-mode: 人機/AI對弈/分析/殘局)
+├── self_play.py           # AI vs AI simulation + board renderer (cross-platform fonts)
 ├── AI_Games/
-│   ├── AI_Novice/     # Beginner game records & screenshots
-│   ├── AI_LiuDahua/   # Liu Dahua style records & screenshots
-│   └── AI_HuRonghua/  # Hu Ronghua style records & screenshots
+│   ├── AI_Novice/         # Beginner game records & screenshots
+│   ├── AI_LiuDahua/       # Liu Dahua style records & screenshots
+│   ├── AI_HuRonghua/      # Hu Ronghua style records & screenshots
+│   └── tournament/        # Tournament session results
+├── ai_wiki/
+│   ├── LiuDahua_Wiki.md   # 柳大華 style analysis & representative games
+│   └── HuRonghua_Wiki.md  # 胡榮華 style analysis & representative games
 ├── static/
-│   ├── css/style.css
-│   └── js/main.js
+│   ├── css/style.css      # Wuxia gold-red theme
+│   └── js/main.js         # 4-mode UI logic
 └── templates/
-    └── index.html
+    └── index.html         # 4-tab layout (人機/AI/分析/殘局)
 ```
 
 ## Branches
 
 | Branch | Purpose |
 |--------|---------|
-| `master` | Stable releases |
-| `Caught_the_king` | Active R&D — new features, training, experiments |
+| `Caught_the_king_master` | Stable releases (merged from Caught_the_king) |
+| `Caught_the_king_dev` | Active R&D — 擒王理論 research, new features, training |
+| `Web_UI_App` | Wuxia-themed WebUI App (武俠仙人對弈 UI) |
 
 ## License
 

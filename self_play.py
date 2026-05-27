@@ -42,12 +42,30 @@ MAX_MOVES = 150          # draw if no win by this many half-moves
 # ── Font helper ────────────────────────────────────────────────────────────────
 
 def _load_font(size):
-    for path in [
-        r"C:\Windows\Fonts\simsun.ttc",
-        r"C:\Windows\Fonts\simhei.ttf",
-        r"C:\Windows\Fonts\msyh.ttc",
-        r"C:\Windows\Fonts\msjh.ttc",
-    ]:
+    """Load CJK-capable font cross-platform; falls back to PIL default."""
+    import sys
+    candidates = []
+    if sys.platform == "win32":
+        _win_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
+        candidates = [
+            os.path.join(_win_fonts, "simsun.ttc"),
+            os.path.join(_win_fonts, "simhei.ttf"),
+            os.path.join(_win_fonts, "msyh.ttc"),
+            os.path.join(_win_fonts, "msjh.ttc"),
+        ]
+    elif sys.platform == "darwin":
+        candidates = [
+            "/System/Library/Fonts/STHeiti Light.ttc",
+            "/System/Library/Fonts/PingFang.ttc",
+            "/Library/Fonts/Arial Unicode.ttf",
+        ]
+    else:  # Linux / other
+        candidates = [
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+            "/usr/share/fonts/truetype/arphic/uming.ttc",
+        ]
+    for path in candidates:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, size)

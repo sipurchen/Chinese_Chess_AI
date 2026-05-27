@@ -220,9 +220,37 @@ Record of user commands that shaped this project. Each entry captures the origin
 
 ---
 
+## Session 7 — 2026-05-28
+
+### Command: Branch 整理 + 路徑清潔 + 分支策略重組
+
+```
+1. 把 Caught_the_king merge 到 master，移除 Caught_the_king 分支，
+   master 改名為 Caught_the_king_master
+2. 確認專案不含任何本機資料夾名稱 E: C: D:，
+   所有測試與程式運作邏輯改為相對位置，去除本機隱私
+3. 更新 README.MD Others_AI.MD UserCommand.MD 後
+   git commit push 到所有分支，開新分支 Caught_the_king_dev
+   以後以此分支主要研究擒王理論
+```
+
+**Result:**
+- `Caught_the_king` fast-forward merged into `master` (81f956b → 615d59a, 144 files)
+- `Caught_the_king` local + remote branch deleted
+- `master` renamed to `Caught_the_king_master` (local + remote)
+- **Path privacy fix** (`self_play.py`): hardcoded `C:\Windows\Fonts\*` replaced with cross-platform font discovery using `%WINDIR%` env var; macOS/Linux paths added; fully portable
+- README.md updated: branches table, project structure
+- Others_AI.MD updated: Session 7 branch strategy section
+- New branch `Caught_the_king_dev` created for ongoing 擒王理論 research
+- All branches pushed: `Caught_the_king_master`, `Caught_the_king_dev`, `Web_UI_App`
+
+---
+
 ## Conventions
 
-- All new R&D happens on branch `Caught_the_king`
-- Stable releases merged to `master`
-- Game records in `AI_Games/<personality>/` serve as training reference for each AI personality
+- Active 擒王理論 R&D on branch `Caught_the_king_dev`
+- Stable releases on `Caught_the_king_master`
+- `Web_UI_App` for武俠仙人對弈 WebUI App development
+- Game records in `AI_Games/<personality>/` serve as training reference
 - `ai_memory.py` is the central knowledge store — EndingStep, opening books, tactical patterns
+- All file paths must be relative (`os.path.dirname(__file__)`) — no hardcoded drive letters
