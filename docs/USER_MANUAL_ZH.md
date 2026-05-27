@@ -1,6 +1,6 @@
 # 操作手冊 — 中國象棋 AI
 
-> **Language / 語言：** [English](USER_MANUAL.md) ｜ [中文](#操作手冊--中國象棋-ai)
+> **Language / 語言：** [English](USER_MANUAL.md) ｜ [中文](USER_MANUAL_ZH.md)
 
 ---
 

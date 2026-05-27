@@ -1,6 +1,6 @@
 # 實作計劃 — 中國象棋 AI
 
-> **Language / 語言：** [English](IMPLEMENTATION_PLAN.md) ｜ [中文](#實作計劃--中國象棋-ai)
+> **Language / 語言：** [English](IMPLEMENTATION_PLAN.md) ｜ [中文](IMPLEMENTATION_PLAN_ZH.md)
 
 ---
 

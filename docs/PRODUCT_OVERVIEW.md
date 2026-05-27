@@ -1,6 +1,6 @@
 # Product Overview Document — Chinese Chess AI
 
-> **Language / 語言：** [English](#product-overview-document--chinese-chess-ai) ｜ [中文](PRODUCT_OVERVIEW.zh.md)
+> **Language / 語言：** [English](#product-overview-document--chinese-chess-ai) ｜ [中文](PRODUCT_OVERVIEW_ZH.md)
 
 ---
 

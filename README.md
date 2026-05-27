@@ -100,9 +100,9 @@ chinese_chess_ai/
 ├── app.py                 # Flask server (4-mode REST API)
 ├── self_play.py           # AI vs AI sim + board renderer
 ├── docs/                  # Bilingual documentation
-│   ├── PRODUCT_OVERVIEW.md / .zh.md
-│   ├── IMPLEMENTATION_PLAN.md / .zh.md
-│   └── USER_MANUAL.md / .zh.md
+│   ├── PRODUCT_OVERVIEW.md / PRODUCT_OVERVIEW_ZH.md
+│   ├── IMPLEMENTATION_PLAN.md / IMPLEMENTATION_PLAN_ZH.md
+│   └── USER_MANUAL.md / USER_MANUAL_ZH.md
 ├── AI_Games/              # Generated game records
 ├── ai_wiki/               # Personality style references
 ├── static/                # CSS + JS
@@ -113,9 +113,9 @@ chinese_chess_ai/
 
 | Document | English | 中文 |
 |----------|---------|------|
-| Product Overview | [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md) | [PRODUCT_OVERVIEW.zh.md](docs/PRODUCT_OVERVIEW.zh.md) |
-| Implementation Plan | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | [IMPLEMENTATION_PLAN.zh.md](docs/IMPLEMENTATION_PLAN.zh.md) |
-| User Manual | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL.zh.md](docs/USER_MANUAL.zh.md) |
+| Product Overview | [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md) | [PRODUCT_OVERVIEW_ZH.md](docs/PRODUCT_OVERVIEW_ZH.md) |
+| Implementation Plan | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | [IMPLEMENTATION_PLAN_ZH.md](docs/IMPLEMENTATION_PLAN_ZH.md) |
+| User Manual | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL_ZH.md](docs/USER_MANUAL_ZH.md) |
 
 ### Branch Strategy
 
@@ -216,9 +216,9 @@ chinese_chess_ai/
 ├── app.py                 # Flask 伺服器（四模式 REST API）
 ├── self_play.py           # AI vs AI 自對弈 + 棋盤渲染
 ├── docs/                  # 雙語文件
-│   ├── PRODUCT_OVERVIEW.md / .zh.md
-│   ├── IMPLEMENTATION_PLAN.md / .zh.md
-│   └── USER_MANUAL.md / .zh.md
+│   ├── PRODUCT_OVERVIEW.md / PRODUCT_OVERVIEW_ZH.md
+│   ├── IMPLEMENTATION_PLAN.md / IMPLEMENTATION_PLAN_ZH.md
+│   └── USER_MANUAL.md / USER_MANUAL_ZH.md
 ├── AI_Games/              # 生成的棋局記錄
 ├── ai_wiki/               # 棋手風格參考資料
 ├── static/                # CSS + JS
@@ -229,9 +229,9 @@ chinese_chess_ai/
 
 | 文件 | English | 中文 |
 |------|---------|------|
-| 產品概述 | [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md) | [PRODUCT_OVERVIEW.zh.md](docs/PRODUCT_OVERVIEW.zh.md) |
-| 實作計劃 | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | [IMPLEMENTATION_PLAN.zh.md](docs/IMPLEMENTATION_PLAN.zh.md) |
-| 操作手冊 | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL.zh.md](docs/USER_MANUAL.zh.md) |
+| 產品概述 | [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md) | [PRODUCT_OVERVIEW_ZH.md](docs/PRODUCT_OVERVIEW_ZH.md) |
+| 實作計劃 | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | [IMPLEMENTATION_PLAN_ZH.md](docs/IMPLEMENTATION_PLAN_ZH.md) |
+| 操作手冊 | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL_ZH.md](docs/USER_MANUAL_ZH.md) |
 
 ### 分支策略
 

@@ -1,6 +1,6 @@
 # User Manual — Chinese Chess AI
 
-> **Language / 語言：** [English](#user-manual--chinese-chess-ai) ｜ [中文](USER_MANUAL.zh.md)
+> **Language / 語言：** [English](#user-manual--chinese-chess-ai) ｜ [中文](USER_MANUAL_ZH.md)
 
 ---
 

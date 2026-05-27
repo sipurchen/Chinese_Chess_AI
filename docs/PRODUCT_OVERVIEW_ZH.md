@@ -1,6 +1,6 @@
 # 產品概述文件 — 中國象棋 AI
 
-> **Language / 語言：** [English](PRODUCT_OVERVIEW.md) ｜ [中文](#產品概述文件--中國象棋-ai)
+> **Language / 語言：** [English](PRODUCT_OVERVIEW.md) ｜ [中文](PRODUCT_OVERVIEW_ZH.md)
 
 ---
 

@@ -1,6 +1,6 @@
 # Implementation Plan — Chinese Chess AI
 
-> **Language / 語言：** [English](#implementation-plan--chinese-chess-ai) ｜ [中文](IMPLEMENTATION_PLAN.zh.md)
+> **Language / 語言：** [English](#implementation-plan--chinese-chess-ai) ｜ [中文](IMPLEMENTATION_PLAN_ZH.md)
 
 ---
 
