@@ -857,6 +857,10 @@ class ChineseChessEngine:
             self.history.append(thought)
         return {'move': fmt, 'thought': thought}
 
+    def base_get_best_move(self, depth=1):
+        """Shallow analysis for display panels — always uses base depth, bypasses opening book."""
+        return ChineseChessEngine.get_best_move(self, depth)
+
     def get_best_move(self, depth=3):
         moves = self.generate_legal_moves(self.board, self.turn)
         if not moves:
