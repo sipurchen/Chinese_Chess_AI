@@ -801,6 +801,62 @@ class ChineseChessEngine:
 
         return best_score, best_pv
 
+    def _try_opening_move(self, max_moves: int):
+        """
+        共用開局書查詢邏輯（base-class version）。
+        Returns move-result dict from opening book, or None if exhausted / illegal.
+        Subclasses must set self.opening_book and self.opening_moves_used.
+        """
+        if not hasattr(self, 'opening_book') or not hasattr(self, 'opening_moves_used'):
+            return None
+        if self.opening_moves_used >= max_moves:
+            return None
+        book_moves = self.opening_book.get("start", [])
+        if not book_moves or self.opening_moves_used >= len(book_moves):
+            return None
+
+        move_tuple, _ = book_moves[self.opening_moves_used]
+
+        # Mirror: book is written from Red's perspective
+        if self.turn == 'black':
+            (r1, c1), (r2, c2) = move_tuple
+            move_tuple = ((9 - r1, 8 - c1), (9 - r2, 8 - c2))
+
+        legal = self.generate_legal_moves(self.board, self.turn)
+        self.opening_moves_used += 1
+
+        if move_tuple not in legal:
+            return None  # Opponent deviated — fall through to search
+
+        r1, c1 = move_tuple[0]
+        r2, c2 = move_tuple[1]
+        fmt = {'r1': r1, 'c1': c1, 'r2': r2, 'c2': c2}
+        opening_tag = self.classify_opening(self.board)
+        thought = {
+            'turn': self.turn,
+            'best_move': fmt,
+            'score': 0,
+            'score_change': 0,
+            'pv': [fmt],
+            'detailed_pv': [{
+                'piece': self.get_piece_name(self.board[r1][c1]),
+                'from': (r1, c1), 'to': (r2, c2),
+                'move_str': f'開局定式 [{self.opening_book.get("name","?")}] '
+                            f'step {self.opening_moves_used}  ({opening_tag})',
+            }],
+            'mate_in': None,
+            'opponent_threat_in': None,
+            'initiative_advantage': None,
+            'forbidden_warning': None,
+            'repetition_move': None,
+            'source': 'opening_book',
+            'opening_name': self.opening_book.get('name', '?'),
+            'opening_tag': opening_tag,
+        }
+        if hasattr(self, 'history'):
+            self.history.append(thought)
+        return {'move': fmt, 'thought': thought}
+
     def get_best_move(self, depth=3):
         moves = self.generate_legal_moves(self.board, self.turn)
         if not moves:
@@ -1037,61 +1093,6 @@ class LiuDahuaAI(ChineseChessEngine):
         score += len(my_moves) // 3
 
         return score
-
-    def _try_opening_move(self, max_moves: int):
-        """
-        共用開局書查詢邏輯。
-        Returns a move-result dict from opening book, or None if exhausted/illegal.
-        Supports color-independent books via mirror transform for Black.
-        """
-        if self.opening_moves_used >= max_moves:
-            return None
-        book_moves = self.opening_book.get("start", [])
-        if not book_moves or self.opening_moves_used >= len(book_moves):
-            return None
-
-        move_tuple, _ = book_moves[self.opening_moves_used]
-
-        # Mirror: book is written from Red's perspective
-        if self.turn == 'black':
-            (r1, c1), (r2, c2) = move_tuple
-            move_tuple = ((9 - r1, 8 - c1), (9 - r2, 8 - c2))
-
-        legal = self.generate_legal_moves(self.board, self.turn)
-        self.opening_moves_used += 1
-
-        if move_tuple not in legal:
-            # Opponent deviated — log but fall through to search
-            return None
-
-        r1, c1 = move_tuple[0]
-        r2, c2 = move_tuple[1]
-        fmt = {'r1': r1, 'c1': c1, 'r2': r2, 'c2': c2}
-        # Annotate with opening classifier info
-        opening_tag = self.classify_opening(self.board)
-        thought = {
-            'turn': self.turn,
-            'best_move': fmt,
-            'score': 0,
-            'score_change': 0,
-            'pv': [fmt],
-            'detailed_pv': [{
-                'piece': self.get_piece_name(self.board[r1][c1]),
-                'from': (r1, c1), 'to': (r2, c2),
-                'move_str': f'開局定式 [{self.opening_book.get("name","?")}] '
-                            f'step {self.opening_moves_used}  ({opening_tag})',
-            }],
-            'mate_in': None,
-            'opponent_threat_in': None,
-            'initiative_advantage': None,
-            'forbidden_warning': None,
-            'repetition_move': None,
-            'source': 'opening_book',
-            'opening_name': self.opening_book.get('name', '?'),
-            'opening_tag': opening_tag,
-        }
-        self.history.append(thought)
-        return {'move': fmt, 'thought': thought}
 
     def get_best_move(self, depth=None):
         depth = self.SEARCH_DEPTH
