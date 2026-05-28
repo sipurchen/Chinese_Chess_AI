@@ -30,6 +30,12 @@
 
 中國象棋唯一目的就是擒獲對方將/帥。所有評估最終回答：**「幾步後能擒王？」**
 
+**開局定式截圖** — 引擎從開局書走棋，分數=0，來源=`opening_book`：
+
+![opening](images/concept_opening.png)
+
+---
+
 ```
 分數 = MATE_SCORE − 擒王所需步數
 MATE_SCORE = 30,000
@@ -53,7 +59,9 @@ MATE_SCORE = 30,000
 
 ### 3.2 子根理論
 
-靜態交換評估（SEE）對每個可被吃的棋子進行分類：
+靜態交換評估（SEE）對每個可被吃的棋子進行分類（紅圈=無根+15，綠圈=有根−5）：
+
+![root theory](images/concept_root_theory.png)
 
 | 分類 | 條件 | 評估調整 |
 |------|------|---------|
@@ -67,7 +75,9 @@ MATE_SCORE = 30,000
 
 ### 3.4 雙方先手
 
-`_quick_mate_threat()` 比較雙方最快強殺步數。若雙方都有威脅，殺路更短的一方取得先手優勢。
+`_quick_mate_threat()` 比較雙方最快強殺步數。殺路更短的一方取得先手：
+
+![initiative](images/concept_initiative.png)
 
 ---
 

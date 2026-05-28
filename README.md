@@ -39,6 +39,63 @@ SEE (Static Exchange Evaluation) classifies every capturable piece:
 | **False Root** 虛根 | Appears defended; recapture still loses | +5 |
 | **Rooted** 有根 | Well-defended — capturing loses | −5 |
 
+### Theory in Action — Real Board Screenshots
+
+#### 1. 開局定式 Opening Book
+
+Red's cannon flies to centre (炮七平五); engine immediately plays from opening book — score=0, source=`opening_book`, name=`中炮盤頭馬`.
+
+![opening](docs/images/concept_opening.png)
+
+---
+
+#### 2. 擒王分數 Catch-the-King Score
+
+Formula proven on a real game position (Turn 51 of LiuDahua vs HuRonghua):
+
+```
+Score = MATE_SCORE − depth_to_mate = 30,000 − 1 = 29,999
+```
+
+![catch king](docs/images/concept_catch_king.png)
+
+---
+
+#### 3. 子根理論 Root Theory (SEE)
+
+Static Exchange Evaluation classifies every capturable piece before searching:
+
+![root theory](docs/images/concept_root_theory.png)
+
+> **無根** (undefended) → eval +15 · **有根** (well-defended) → eval −5
+
+---
+
+#### 4. 雙方先手 Mutual Initiative
+
+`_quick_mate_threat()` compares both sides' fastest forced-mate depth. Side with shorter path holds initiative:
+
+![initiative](docs/images/concept_initiative.png)
+
+---
+
+#### 5. 殘局絕殺 Endgame Forced Mate
+
+Score hits 29,999 when mate-in-1 is confirmed — the final countdown of 擒王分數:
+
+![endgame mate](docs/images/concept_endgame_mate.png)
+
+---
+
+#### Score Progression — Full Game (51 moves)
+
+| Turn 11 · Score 51 | Turn 35 · Score 170 | Turn 43 · Score 291 | Turn 51 · Score 29999 |
+|---|---|---|---|
+| ![51](docs/images/score_051_earlyadvantage.png) | ![170](docs/images/score_170_clearadvantage.png) | ![291](docs/images/score_291_dominant.png) | ![mate](docs/images/score_29999_matein1.png) |
+| First capture | Clear advantage | Dominant | Forced mate (擒王!) |
+
+---
+
 ### Features
 
 #### Engine (`engine.py`)
@@ -154,6 +211,63 @@ MIT — see [LICENSE](LICENSE)
 | **無根** | 無防守，吃子獲利 | +15 |
 | **虛根** | 看似有防守，但反吃仍虧子 | +5 |
 | **有根** | 防守完善，吃子吃虧 | −5 |
+
+### 理論實戰截圖
+
+#### 1. 開局定式
+
+紅方炮七平五，引擎直接從開局書走棋 — 分數=0，來源=`opening_book`，局型=`中炮盤頭馬`。
+
+![opening](docs/images/concept_opening.png)
+
+---
+
+#### 2. 擒王分數
+
+公式以真實對局（柳大華 vs 胡榮華 第51步）驗證：
+
+```
+分數 = MATE_SCORE − 擒王所需步數 = 30,000 − 1 = 29,999
+```
+
+![catch king](docs/images/concept_catch_king.png)
+
+---
+
+#### 3. 子根理論（SEE 靜態交換評估）
+
+在搜索前對每枚可被吃的棋子進行分類：
+
+![root theory](docs/images/concept_root_theory.png)
+
+> **無根**（無人防守）→ 評估+15 · **有根**（有人防守）→ 評估−5
+
+---
+
+#### 4. 雙方先手
+
+`_quick_mate_threat()` 比較雙方最快強殺深度。殺路更短的一方取得先手：
+
+![initiative](docs/images/concept_initiative.png)
+
+---
+
+#### 5. 殘局絕殺
+
+一步殺確認時分數達 29,999 — 擒王分數的最終倒數：
+
+![endgame mate](docs/images/concept_endgame_mate.png)
+
+---
+
+#### 分數演變 — 完整對局（51步）
+
+| 第11步 · 51分 | 第35步 · 170分 | 第43步 · 291分 | 第51步 · 29999分 |
+|---|---|---|---|
+| ![51](docs/images/score_051_earlyadvantage.png) | ![170](docs/images/score_170_clearadvantage.png) | ![291](docs/images/score_291_dominant.png) | ![mate](docs/images/score_29999_matein1.png) |
+| 首次吃子 | 明顯優勢 | 全面壓制 | 一步強殺（擒王！） |
+
+---
 
 ### 功能特色
 

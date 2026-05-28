@@ -51,9 +51,21 @@ The four screenshots below are taken from a real AI vs AI game (柳大華 vs 胡
 
 > The header of the final screenshot reads **"Score: 29999 (Win in 1)"** — the exact moment the engine has counted down to zero.
 
+---
+
+**Opening Book in action** — source: `opening_book`, score: 0, name: 中炮盤頭馬:
+
+![opening](images/concept_opening.png)
+
+---
+
 ### 3.2 子根理論 (Root Theory)
 
-Static Exchange Evaluation (SEE) classifies every capturable piece:
+Static Exchange Evaluation (SEE) classifies every capturable piece. Board example — red circle = 無根 (+15), green circle = 有根 (−5):
+
+![root theory](images/concept_root_theory.png)
+
+SEE classification table:
 
 | Class | 分類 | Condition | Eval Adjust |
 |-------|------|-----------|-------------|
@@ -67,7 +79,9 @@ When in check, legal counter-checks are prioritised in move ordering — avoidin
 
 ### 3.4 雙方先手 (Mutual Initiative)
 
-`_quick_mate_threat()` compares both sides' fastest forced-mate depth. If both have threats, the side with the shorter path wins the initiative analysis.
+`_quick_mate_threat()` compares both sides' fastest forced-mate depth. Side with shorter path wins the initiative analysis:
+
+![initiative](images/concept_initiative.png)
 
 ---
 
