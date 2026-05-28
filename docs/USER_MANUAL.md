@@ -69,7 +69,73 @@ After each AI move, the right panel shows:
 | **Source** | `opening_book` or `search` |
 | **Initiative** | Which side has the faster forced-mate threat |
 
-### 2.4 Controls
+### 2.4 Understanding 擒王分數 (Catch-the-King Score)
+
+Every score in the AI thought panel is a **擒王分數** — a measure of how close one side is to capturing the opponent's king.
+
+```
+Score = MATE_SCORE − depth_to_mate
+MATE_SCORE = 30,000
+```
+
+A higher Red score means Red is closer to winning. The scale works as follows:
+
+| Score range | Meaning |
+|-------------|---------|
+| 0 | Balanced — neither side has a clear advantage |
+| 50–100 | Small advantage — one piece captured or superior position |
+| 150–300 | Clear advantage — multiple pieces up, dominant position |
+| 1,000+ | Winning — major material or positional crush |
+| 29,999 | Forced mate in 1 move (`30,000 − 1`) |
+| 29,998 | Forced mate in 2 moves (`30,000 − 2`) |
+| 29,997 | Forced mate in 3 moves, and so on… |
+
+The following four screenshots show a real AI vs AI game (柳大華 vs 胡榮華, 51 moves):
+
+---
+
+**Turn 11 — Score: 51 (Red captures a pawn, first turning point)**
+
+![Score 51](images/score_051_earlyadvantage.png)
+
+Red's rook (俥) advanced deep into Black's territory and captured a pawn.  
+Score = **+51** — small advantage, the game is still open.  
+The green dot marks the last move destination.
+
+---
+
+**Turn 35 — Score: 170 (Red dominates the centre)**
+
+![Score 170](images/score_170_clearadvantage.png)
+
+Red's cannon (炮) controls the middle; Black has lost rooks and knights.  
+Score = **+170** — Red is clearly winning in material and position.
+
+---
+
+**Turn 43 — Score: 291 (Red overwhelming)**
+
+![Score 291](images/score_291_dominant.png)
+
+Only a handful of Black pieces survive. Red's rook and cannon coordinate freely.  
+Score = **+291** — Red dominates; every Black piece is under threat.
+
+---
+
+**Turn 51 — Score: 29,999 "Win in 1" (擒王!)**
+
+![Score 29999](images/score_29999_matein1.png)
+
+The header reads **Score: 29999 (Win in 1)**.  
+`MATE_SCORE − 1 = 30,000 − 1 = 29,999` — Red has a forced checkmate in one move.  
+Red's rook (俥) stands inside Black's palace; the black king (將) has nowhere to go.  
+This is the **擒王 (catch-the-king)** moment the scoring system counts down to from move 1.
+
+---
+
+> **Key insight:** Even in move 1, when the score is 0, the engine is already calculating: "How many moves until I can force a score of 30,000?" Every quiet positional move, every piece trade, every pawn advance is evaluated by this single question — *how does this bring me closer to catching the king?*
+
+### 2.5 Controls
 
 - **Reset** — returns board to starting position
 - **Undo** — not yet implemented (planned for Phase 2)

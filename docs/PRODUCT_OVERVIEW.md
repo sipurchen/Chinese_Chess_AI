@@ -32,9 +32,24 @@ The only purpose of Chinese Chess is to capture the opponent's king. Every evalu
 
 ```
 Score = MATE_SCORE − depth_to_mate
+MATE_SCORE = 30,000
 ```
 
 Faster mates always rank higher. Opponent's best defences are fully accounted for through alpha-beta search.
+
+The four screenshots below are taken from a real AI vs AI game (柳大華 vs 胡榮華, 51 moves), showing how 擒王分數 evolves from 0 → 51 → 170 → 291 → 29,999:
+
+| Turn 11 — Score: 51 | Turn 35 — Score: 170 |
+|---|---|
+| ![51](images/score_051_earlyadvantage.png) | ![170](images/score_170_clearadvantage.png) |
+| First capture; small advantage | Multiple pieces up; Red dominates |
+
+| Turn 43 — Score: 291 | Turn 51 — Score: 29,999 (**擒王!**) |
+|---|---|
+| ![291](images/score_291_dominant.png) | ![29999](images/score_29999_matein1.png) |
+| Overwhelming position | Forced mate in 1 — `30,000 − 1 = 29,999` |
+
+> The header of the final screenshot reads **"Score: 29999 (Win in 1)"** — the exact moment the engine has counted down to zero.
 
 ### 3.2 子根理論 (Root Theory)
 
