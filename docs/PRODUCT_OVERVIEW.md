@@ -148,7 +148,7 @@ When in check, legal counter-checks are prioritised in move ordering — avoidin
 - Branch restructure + privacy-clean codebase
 
 ### Phase 2 — Wuxia WebUI App (2026 Q3–Q4)
-See [`Others_AI_Planning.md`](../Others_AI_Planning.md) for full spec.
+See [`Others_AI.MD` — Section 12](../Others_AI.MD) for full spec.
 
 - 水墨 ink-wash art direction (board, pieces, backgrounds)
 - Paper-doll avatar system + Gemini face-generation

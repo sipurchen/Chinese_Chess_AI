@@ -158,7 +158,7 @@ Record of user commands that shaped this project. Each entry captures the origin
   - Mode 2（AI對弈）：賽事啟動、輪詢進度、對局回放（precomputeBoards + 步進/自動播放）
   - Mode 3（分析棋局）：載入棋局、步進導航、一鍵AI分析
   - Mode 4（試解殘局）：棋子調色盤擺棋（左鍵放、右鍵刪）、AI解題、相似殘局、儲存
-- `Others_AI_Planning.md` 武俠仙人對弈 WebUI App 完整規劃文件（美術方向/角色系統/棋道點數/技術架構/里程碑）
+- `Others_AI.MD` 第十二節：武俠仙人對弈 WebUI App 完整規劃（美術方向/角色系統/棋道點數/技術架構/里程碑，已併入 Others_AI.MD）
 
 ---
 

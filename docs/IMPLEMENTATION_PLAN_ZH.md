@@ -259,7 +259,7 @@ else:
 
 ## 九、第二階段實作計劃（武俠仙人對弈 WebUI）
 
-詳見 [`Others_AI_Planning.md`](../Others_AI_Planning.md)。
+詳見 [`Others_AI.MD` 第十二節](../Others_AI.MD)。
 
 ### 計劃新增模組
 

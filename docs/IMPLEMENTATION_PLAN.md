@@ -259,7 +259,7 @@ A screenshot is saved when **any** of:
 
 ## 9. Phase 2 Implementation Plan (Wuxia WebUI)
 
-See [`Others_AI_Planning.md`](../Others_AI_Planning.md) for full spec.
+See [`Others_AI.MD` — Section 12](../Others_AI.MD) for full spec.
 
 ### Planned New Modules
 

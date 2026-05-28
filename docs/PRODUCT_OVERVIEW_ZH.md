@@ -148,7 +148,7 @@
 - 分支整理 + 路徑隱私清潔
 
 ### 第二階段 — 武俠仙人對弈 WebUI App（2026 Q3–Q4）
-詳見 [`Others_AI_Planning.md`](../Others_AI_Planning.md)。
+詳見 [`Others_AI.MD` 第十二節](../Others_AI.MD)。
 
 - 水墨美術方向（棋盤、棋子、背景）
 - 紙娃娃頭像系統 + Gemini 水墨臉部生成
