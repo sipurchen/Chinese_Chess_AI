@@ -512,3 +512,51 @@ body {
     .side-panel { width: 220px; }
     .board { width: 450px; }
 }
+
+/* ── Mobile responsive (≤ 640px) ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    #app-header {
+        padding: 8px 12px 6px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    #app-title { font-size: 16px; letter-spacing: 1px; }
+    .tab-btn { padding: 4px 10px; font-size: 12px; }
+
+    #main-layout {
+        flex-direction: column;
+        align-items: center;
+        padding: 8px 8px 16px;
+        gap: 10px;
+        min-height: unset;
+    }
+
+    /* Board: scale to fit ~315px in 375px viewport with padding */
+    #center-panel {
+        zoom: 0.68;
+        /* fallback for non-Chrome */
+        -moz-transform: scale(0.68);
+        -moz-transform-origin: top center;
+    }
+
+    .side-panel {
+        width: 100%;
+        max-width: 440px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .side-panel .panel-block {
+        flex: 1 1 200px;
+        max-height: 180px;
+    }
+
+    /* Compact thought panels on mobile */
+    .thought-panel { font-size: 11px; line-height: 1.4; }
+
+    /* Stack difficulty buttons */
+    .diff-btn { padding: 5px 10px; font-size: 12px; }
+
+    /* Compact control buttons */
+    .ctrl-btn { padding: 5px 10px; font-size: 12px; }
+}

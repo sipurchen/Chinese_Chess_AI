@@ -156,8 +156,11 @@ function isRed(ch) { return ch === ch.toUpperCase() && ch !== '.'; }
 
 function boardCoordFromClick(e) {
     const rect = boardEl.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Compensate for CSS zoom on #center-panel (mobile responsive scaling)
+    const centerPanel = document.getElementById('center-panel');
+    const zoom = parseFloat(window.getComputedStyle(centerPanel).zoom) || 1;
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
     const c = Math.round((x - MARGIN) / CELL);
     const r = Math.round((y - MARGIN) / CELL);
     return { r, c };
@@ -400,31 +403,26 @@ function handleSquareClick(r, c) {
     const piece = gameState[r][c];
 
     if (selectedPiece) {
+        // Deselect if same square clicked again
         if (selectedPiece.r === r && selectedPiece.c === c) {
             selectedPiece = null;
             renderPieces(gameState, true);
             return;
         }
-        // Switch selection if clicking own piece
-        const ownPiece = piece !== '.' &&
-            (isRed(piece) === (turn === 'red'));
-        const allowAny = !hasGameStarted;
-
-        if (allowAny || ownPiece) {
-            if (!hasGameStarted || ownPiece) {
-                selectedPiece = { r, c };
-                renderPieces(gameState, true);
-                return;
-            }
+        // Re-select if clicking another own (red) piece
+        const ownPiece = piece !== '.' && isRed(piece);
+        if (ownPiece) {
+            selectedPiece = { r, c };
+            renderPieces(gameState, true);
+            return;
         }
-        // Attempt move
+        // Otherwise attempt move (to empty square or enemy capture)
         movePiece(selectedPiece.r, selectedPiece.c, r, c);
     } else {
-        if (piece !== '.') {
-            if (!hasGameStarted || isRed(piece) === (turn === 'red')) {
-                selectedPiece = { r, c };
-                renderPieces(gameState, true);
-            }
+        // Select only red pieces (human always plays red)
+        if (piece !== '.' && isRed(piece)) {
+            selectedPiece = { r, c };
+            renderPieces(gameState, true);
         }
     }
 }

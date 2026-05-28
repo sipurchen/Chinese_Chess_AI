@@ -39,7 +39,25 @@ SEE (Static Exchange Evaluation) classifies every capturable piece:
 | **False Root** 虛根 | Appears defended; recapture still loses | +5 |
 | **Rooted** 有根 | Well-defended — capturing loses | −5 |
 
-### Theory in Action — Real Board Screenshots
+### Web UI — Real Screenshots
+
+#### PC View (1280 × 800)
+
+| Opening Position | Mid-Game with AI Thought Panel |
+|---|---|
+| ![PC initial](docs/images/webui_pc.png) | ![PC midgame](docs/images/webui_pc_midgame.png) |
+
+#### Mobile View (iPhone 12 — 390px)
+
+| Opening Position | Mid-Game |
+|---|---|
+| ![Mobile initial](docs/images/webui_mobile.png) | ![Mobile midgame](docs/images/webui_mobile_midgame.png) |
+
+> Thought panel shows: **分數** · **開局書 source** · **推衍路線** (PV — colour-coded red/blue per side) · **先手 / 對方威脅**
+
+---
+
+### Theory in Action — Annotated Board Screenshots
 
 #### 1. 開局定式 Opening Book
 
@@ -211,6 +229,24 @@ MIT — see [LICENSE](LICENSE)
 | **無根** | 無防守，吃子獲利 | +15 |
 | **虛根** | 看似有防守，但反吃仍虧子 | +5 |
 | **有根** | 防守完善，吃子吃虧 | −5 |
+
+### Web UI 真實截圖
+
+#### PC 版（1280 × 800）
+
+| 開局初始 | 中局對弈（含 AI 思路面板） |
+|---|---|
+| ![PC 初始](docs/images/webui_pc.png) | ![PC 中局](docs/images/webui_pc_midgame.png) |
+
+#### 手機版（iPhone 12 — 390px）
+
+| 開局初始 | 中局對弈 |
+|---|---|
+| ![手機初始](docs/images/webui_mobile.png) | ![手機中局](docs/images/webui_mobile_midgame.png) |
+
+> 思路面板顯示：**分數** · **開局書來源** · **推衍路線**（PV — 紅藍配色區分雙方）· **先手 / 對方威脅**
+
+---
 
 ### 理論實戰截圖
 
