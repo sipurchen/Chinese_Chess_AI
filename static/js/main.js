@@ -37,6 +37,7 @@ let gameState   = getInitialBoard();
 let selectedPiece = null;
 let turn        = 'red';
 let hasGameStarted = false;
+let isWaiting   = false;  // true while waiting for AI response (blocks human clicks)
 
 // Mode 2: Tournament
 const trn = {
@@ -195,49 +196,101 @@ function showForbiddenWarning(warning) {
 }
 
 // ── Thought-panel renderer (shared) ──────────────────────────────────────────
+function pvStepText(step, idx) {
+    // Build clean "N. 棋子 (r1,c1)→(r2,c2)" string from step data
+    const piece = step.piece || '';
+    if (step.from && step.to) {
+        const f = step.from;
+        const t = step.to;
+        return `${idx + 1}. ${piece} (${f[0]},${f[1]})→(${t[0]},${t[1]})`;
+    }
+    return `${idx + 1}. ${step.move_str || JSON.stringify(step)}`;
+}
+
 function renderThought(container, thought) {
     if (!container) return;
     if (!thought) { container.textContent = '等待中…'; return; }
 
     const frag = document.createDocumentFragment();
 
+    // ── 1. Score ─────────────────────────────────────────────────────────────
     const scoreLine = document.createElement('div');
     scoreLine.className = 'thought-score';
     const delta = thought.score_change ?? 0;
-    scoreLine.textContent = `分數: ${thought.score}  (${delta >= 0 ? '+' : ''}${delta})`;
+    const sc = thought.score;
+    const scoreDisp = sc >= 29000
+        ? `擒王 ${30000 - sc} 步殺 (${sc})`
+        : sc <= -29000
+        ? `被擒王 ${30000 + sc} 步 (${sc})`
+        : sc;
+    scoreLine.textContent = `分數: ${scoreDisp}  (${delta >= 0 ? '+' : ''}${delta})`;
     frag.appendChild(scoreLine);
 
+    // ── 2. Mate / threat ─────────────────────────────────────────────────────
     if (thought.mate_in != null) {
         const ml = document.createElement('div');
         ml.className = 'thought-mate';
         const steps = Math.abs(thought.mate_in);
         ml.textContent = thought.mate_in > 0
-            ? `擒王在 ${steps} 步內！`
-            : `被擒王威脅（${steps} 步）`;
+            ? `⚔ 擒王在 ${steps} 步內！`
+            : `⚠ 被擒王威脅（${steps} 步）`;
         frag.appendChild(ml);
     }
 
+    if (thought.opponent_threat_in != null) {
+        const ot = document.createElement('div');
+        ot.className = 'thought-opp';
+        ot.textContent = `↩ 對方可 ${thought.opponent_threat_in} 步內反擊`;
+        frag.appendChild(ot);
+    }
+
+    // ── 3. Initiative ────────────────────────────────────────────────────────
     if (thought.initiative_advantage != null) {
         const il = document.createElement('div');
         il.className = 'thought-score';
         const ia = thought.initiative_advantage;
-        il.textContent = `先手優勢: ${ia > 0 ? '+' : ''}${ia}`;
+        const label = ia > 0 ? '我方先手 +' : ia < 0 ? '對方先手 ' : '先手均衡 ';
+        il.textContent = `先手: ${label}${ia}`;
         frag.appendChild(il);
     }
 
+    // ── 4. Source / opening ──────────────────────────────────────────────────
+    const src = thought.source || 'search';
+    const srcEl = document.createElement('div');
+    srcEl.className = 'thought-source';
+    if (src === 'opening_book') {
+        srcEl.textContent = `📖 開局書: ${thought.opening_name || '?'}`;
+    } else if (src === 'mate_in_1') {
+        srcEl.textContent = '⚡ 一步殺捷徑';
+    } else {
+        srcEl.textContent = `🔍 Alpha-Beta 搜索`;
+        if (thought.opening_name) {
+            srcEl.textContent += `  [${thought.opening_name}]`;
+        }
+    }
+    frag.appendChild(srcEl);
+
+    // ── 5. PV (推衍路線) ─────────────────────────────────────────────────────
     if (thought.detailed_pv && thought.detailed_pv.length > 0) {
-        const pvd = document.createElement('div');
-        pvd.className = 'thought-pv';
-        pvd.textContent = '思考路線:';
-        frag.appendChild(pvd);
-        thought.detailed_pv.slice(0, 6).forEach((step, i) => {
+        const aiTurn = thought.turn;  // 'red' or 'black'
+        const pvHeader = document.createElement('div');
+        pvHeader.className = 'thought-pv-header';
+        const pvLen = Math.min(thought.detailed_pv.length, 8);
+        pvHeader.textContent = `推衍路線 (${pvLen}步):`;
+        frag.appendChild(pvHeader);
+
+        thought.detailed_pv.slice(0, 8).forEach((step, i) => {
             const l = document.createElement('div');
-            l.className = 'thought-pv';
-            l.textContent = `  ${i + 1}. ${step.move_str || JSON.stringify(step)}`;
+            // Even idx = AI's move, odd idx = opponent's predicted response
+            const isAI = (i % 2 === 0);
+            const stepTurn = isAI ? aiTurn : (aiTurn === 'red' ? 'black' : 'red');
+            l.className = stepTurn === 'red' ? 'thought-pv-red' : 'thought-pv-black';
+            l.textContent = '  ' + pvStepText(step, i);
             frag.appendChild(l);
         });
     }
 
+    // ── 6. Warnings ──────────────────────────────────────────────────────────
     if (thought.forbidden_warning) {
         const wl = document.createElement('div');
         wl.className = 'thought-trap';
@@ -313,10 +366,14 @@ function switchMode(mode) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function updateHumanStatus() {
+    if (isWaiting) {
+        statusEl.textContent = 'AI 思考中…';
+        return;
+    }
     if (!hasGameStarted) {
         statusEl.textContent = '玩家先行 (請選擇棋子)';
     } else {
-        statusEl.textContent = turn === 'red' ? '紅方回合' : '黑方回合';
+        statusEl.textContent = turn === 'red' ? '紅方回合 (請選擇棋子)' : '黑方回合';
     }
 }
 
@@ -339,6 +396,7 @@ function handleHumanClick(e) {
 }
 
 function handleSquareClick(r, c) {
+    if (isWaiting) return;  // block clicks while AI is computing
     const piece = gameState[r][c];
 
     if (selectedPiece) {
@@ -386,6 +444,7 @@ function movePiece(r1, c1, r2, c2) {
     gameState[r2][c2] = gameState[r1][c1];
     gameState[r1][c1] = '.';
     selectedPiece = null;
+    isWaiting = true;  // lock board while AI computes
     renderPieces(gameState, true);
     updateHumanStatus();
 
@@ -396,9 +455,21 @@ function movePiece(r1, c1, r2, c2) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.status === 'game_over' && !data.move) {
+        isWaiting = false;  // unlock board
+
+        if (data.game_over || (data.status === 'game_over')) {
+            // Apply AI move if present
+            if (data.move) {
+                const m = data.move;
+                gameState[m.r2][m.c2] = gameState[m.r1][m.c1];
+                gameState[m.r1][m.c1] = '.';
+                renderPieces(gameState, true);
+                renderThought(document.getElementById('black-thought'), data.black_thought);
+                renderThought(document.getElementById('red-thought'),   data.red_thought);
+            }
             statusEl.textContent = `遊戲結束！${data.winner === 'red' ? '紅方' : '黑方'} 獲勝！`;
             hasGameStarted = false;
+            turn = 'red';  // reset so next game starts clean
             return;
         }
 
@@ -414,23 +485,29 @@ function movePiece(r1, c1, r2, c2) {
             const m = data.move;
             gameState[m.r2][m.c2] = gameState[m.r1][m.c1];
             gameState[m.r1][m.c1] = '.';
-            turn = turn === 'red' ? 'black' : 'red';
+            turn = 'red';  // human always plays red; after AI moves it's red's turn
             renderPieces(gameState, true);
             renderThought(document.getElementById('black-thought'), data.black_thought);
             renderThought(document.getElementById('red-thought'),   data.red_thought);
             showForbiddenWarning(data.forbidden_warning);
 
-            if (data.game_over) {
-                statusEl.textContent = `遊戲結束！${data.winner === 'red' ? '紅方' : '黑方'} 獲勝！`;
-                hasGameStarted = false;
-            } else if (data.in_check) {
+            if (data.in_check) {
                 statusEl.textContent = '將軍！';
             } else {
                 updateHumanStatus();
             }
+        } else {
+            // Server responded but no AI move (unexpected) — restore turn so player can move
+            turn = 'red';
+            updateHumanStatus();
         }
     })
-    .catch(err => console.error('move error:', err));
+    .catch(err => {
+        console.error('move error:', err);
+        isWaiting = false;  // always unlock on error
+        turn = 'red';       // restore player turn
+        updateHumanStatus();
+    });
 }
 
 // Difficulty buttons
@@ -466,6 +543,7 @@ function resetHuman() {
     selectedPiece = null;
     turn          = 'red';
     hasGameStarted = false;
+    isWaiting     = false;
     renderPieces(gameState, true);
     updateHumanStatus();
     document.getElementById('black-thought').textContent = '等待中…';

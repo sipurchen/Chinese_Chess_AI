@@ -965,6 +965,7 @@ class ChineseChessEngine:
             'initiative_advantage': initiative_advantage,  # 先手差 (正=我快)
             'forbidden_warning': self.forbidden_warning,
             'repetition_move': rep_type,
+            'source': 'search',
         }
         self.forbidden_warning = None  # reset after read
         self.history.append(thought)
