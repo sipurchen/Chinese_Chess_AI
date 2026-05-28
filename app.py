@@ -66,7 +66,9 @@ def move():
     if ai_move:
         ai_result = engine.apply_move(ai_move)
         if not ai_result.get('game_over'):
-            red_analysis = engine.get_best_move()
+            # Use shallow depth-1 analysis for red thought panel
+            # (avoids a second full-depth search that can take 5–30s)
+            red_analysis = engine.base_get_best_move(depth=1)
             if red_analysis:
                 red_thought = red_analysis.get('thought')
 
