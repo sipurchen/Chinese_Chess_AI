@@ -1163,7 +1163,8 @@ const style = document.createElement('style');
 style.textContent = `@keyframes fadeout { from { opacity:1; } to { opacity:0; } }`;
 document.head.appendChild(style);
 
-// Boot
+// Boot — sync server board state with fresh JS state on every page load
+fetch('/reset', { method: 'POST' }).catch(() => {});
 initBoardGrid();
 renderPieces(gameState, true);
 updateHumanStatus();
